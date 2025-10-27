@@ -1,0 +1,80 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table user {
+  id Int [pk, increment]
+  username String [unique, not null]
+  password String [not null]
+  firstName String [not null]
+  lastName String
+  archived Boolean [not null, default: false]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  role Role [not null, default: 'WORKER']
+  categories categories [not null]
+  queue queue [not null]
+}
+
+Table client {
+  id Int [pk, increment]
+  phone String [not null]
+  name String
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  queue queue [not null]
+}
+
+Table services {
+  id Int [pk, increment]
+  name String [unique, not null]
+  price Int [not null]
+  desc String
+  duration Int [not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  category categories [not null]
+  categoryId Int [not null]
+  queue queue [not null]
+}
+
+Table categories {
+  id Int [pk, increment]
+  value String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  user user
+  userId Int
+  services services [not null]
+}
+
+Table queue {
+  id Int [pk, increment]
+  date DateTime [not null]
+  user user [not null]
+  userId Int [not null]
+  client client [not null]
+  clientId Int [not null]
+  service services [not null]
+  serviceId Int [not null]
+}
+
+Table black_list {
+  id Int [pk, increment]
+  phone String [not null]
+}
+
+Enum Role {
+  WORKER
+  ADMIN
+}
+
+Ref: services.categoryId > categories.id
+
+Ref: categories.userId > user.id
+
+Ref: queue.userId > user.id
+
+Ref: queue.clientId > client.id
+
+Ref: queue.serviceId > services.id
