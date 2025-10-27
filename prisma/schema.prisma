@@ -60,8 +60,7 @@ model Category {
   value     String    @unique @db.VarChar(40)
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp(0)
-  user      User?     @relation(fields: [userId], references: [id])
-  userId    Int?      @map("user_id")
+  user      User[]
   services  Service[]
 
   @@map("categories")
