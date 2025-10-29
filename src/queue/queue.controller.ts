@@ -10,6 +10,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { QueueService } from './queue.service';
+
 import { CreateQueueDto } from './dto/create-queue.dto';
 import { UpdateQueueDto } from './dto/update-queue.dto';
 
@@ -32,7 +33,9 @@ export class QueueController {
   }
 
   @Post()
-  async create(@Body(new ValidationPipe()) data: CreateQueueDto) {
+  async create(
+    @Body(new ValidationPipe({ transform: true })) data: CreateQueueDto,
+  ) {
     const [queue, err] = await this.queueService.create(data);
     if (err) throw err;
     return queue;
