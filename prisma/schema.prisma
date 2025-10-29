@@ -31,8 +31,8 @@ model User {
 
 model Client {
   id        Int      @id @default(autoincrement())
-  phone     String   @db.VarChar(40)
-  name      String?  @db.VarChar(40)
+  phone     String   @unique @db.VarChar(40)
+  name      String   @db.VarChar(40)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
   queue     Queue[]
