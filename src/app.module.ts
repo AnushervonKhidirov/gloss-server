@@ -5,6 +5,7 @@ import { PrismaService } from './prisma/prisma.service';
 import { ServiceModule } from './service/service.module';
 import { WorkerModule } from './worker/worker.module';
 import { QueueModule } from './queue/queue.module';
+import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { QueueModule } from './queue/queue.module';
     ServiceModule,
     WorkerModule,
     QueueModule,
+    ClientModule,
   ],
   controllers: [],
   providers: [PrismaService],
