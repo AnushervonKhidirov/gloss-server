@@ -2,10 +2,12 @@ import type { Prisma, Queue } from 'generated/prisma/client';
 import type { ReturnWithErrPromise } from 'src/common/type/return-with-err.type';
 
 import {
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { ServiceService } from 'src/service/service.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { CreateQueueDto } from './dto/create-queue.dto';
@@ -13,15 +15,34 @@ import { UpdateQueueDto } from './dto/update-queue.dto';
 
 import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
 
+const queueIncludes: Prisma.QueueInclude = {
+  client: true,
+  service: true,
+  user: {
+    omit: {
+      username: true,
+      password: true,
+      role: true,
+      archived: true,
+    },
+  },
+};
+
 @Injectable()
 export class QueueService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly serviceService: ServiceService,
+  ) {}
 
   async findOne(
     where: Prisma.QueueWhereUniqueInput,
   ): ReturnWithErrPromise<Queue> {
     try {
-      const queue = await this.prisma.queue.findUnique({ where });
+      const queue = await this.prisma.queue.findUnique({
+        where,
+        include: queueIncludes,
+      });
       if (!queue) throw new NotFoundException('Queue not found');
       return [queue, null];
     } catch (err) {
@@ -33,7 +54,10 @@ export class QueueService {
     where?: Prisma.QueueWhereInput,
   ): ReturnWithErrPromise<Queue[]> {
     try {
-      const queue = await this.prisma.queue.findMany({ where });
+      const queue = await this.prisma.queue.findMany({
+        where,
+        include: queueIncludes,
+      });
       return [queue, null];
     } catch (err) {
       return exceptionHandler(err);
@@ -42,20 +66,12 @@ export class QueueService {
 
   async create(data: CreateQueueDto): ReturnWithErrPromise<Queue> {
     try {
+      const [checkedData, err] = await this.isPossibleToBook(data);
+      if (err) throw err;
+
       const queue = await this.prisma.queue.create({
-        data: data,
-        include: {
-          client: true,
-          service: true,
-          user: {
-            omit: {
-              username: true,
-              password: true,
-              role: true,
-              archived: true,
-            },
-          },
-        },
+        data: checkedData,
+        include: queueIncludes,
       });
 
       if (!queue) {
@@ -76,18 +92,7 @@ export class QueueService {
       const queue = await this.prisma.queue.update({
         where,
         data,
-        include: {
-          client: true,
-          service: true,
-          user: {
-            omit: {
-              username: true,
-              password: true,
-              role: true,
-              archived: true,
-            },
-          },
-        },
+        include: queueIncludes,
       });
 
       if (!queue) {
@@ -116,5 +121,40 @@ export class QueueService {
     }
   }
 
-  private async isPossibleToAdd() {}
+  private async isPossibleToBook(
+    data: CreateQueueDto,
+  ): ReturnWithErrPromise<Prisma.QueueUncheckedCreateInput> {
+    try {
+      const [service, serviceError] = await this.serviceService.findOne({
+        id: data.serviceId,
+      });
+
+      if (serviceError) throw serviceError;
+
+      const endAt = new Date(
+        data.startAt.getTime() + service.duration * 60 * 1000,
+      );
+
+      const [bookedList, bookedErr] = await this.findMany({
+        userId: data.userId,
+        OR: [
+          { startAt: { lt: endAt }, endAt: { gte: endAt } },
+          { startAt: { lte: data.startAt }, endAt: { gt: data.startAt } },
+          { startAt: { gte: data.startAt }, endAt: { lte: endAt } },
+        ],
+      });
+
+      if (bookedErr) throw bookedErr;
+
+      if (bookedList.length > 0) {
+        throw new ConflictException(
+          'There is already an appointment for this time',
+        );
+      }
+
+      return [{ ...data, endAt }, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
 }
