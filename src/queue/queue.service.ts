@@ -22,11 +22,15 @@ export class QueueService {
     private readonly serviceService: ServiceService,
   ) {}
 
-  async findOne(
-    where: Prisma.QueueWhereUniqueInput,
-    include?: Prisma.QueueInclude,
-    omit?: Prisma.QueueOmit,
-  ): ReturnWithErrPromise<Queue> {
+  async findOne({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.QueueWhereUniqueInput;
+    include?: Prisma.QueueInclude;
+    omit?: Prisma.QueueOmit;
+  }): ReturnWithErrPromise<Queue> {
     try {
       const queue = await this.prisma.queue.findUnique({
         where,
@@ -40,11 +44,15 @@ export class QueueService {
     }
   }
 
-  async findMany(
-    where?: Prisma.QueueWhereInput,
-    include?: Prisma.QueueInclude,
-    omit?: Prisma.QueueOmit,
-  ): ReturnWithErrPromise<Queue[]> {
+  async findMany({
+    where,
+    include,
+    omit,
+  }: {
+    where?: Prisma.QueueWhereInput;
+    include?: Prisma.QueueInclude;
+    omit?: Prisma.QueueOmit;
+  }): ReturnWithErrPromise<Queue[]> {
     try {
       const queue = await this.prisma.queue.findMany({
         where,
@@ -57,11 +65,15 @@ export class QueueService {
     }
   }
 
-  async create(
-    data: CreateQueueDto,
-    include?: Prisma.QueueInclude,
-    omit?: Prisma.QueueOmit,
-  ): ReturnWithErrPromise<Queue> {
+  async create({
+    data,
+    include,
+    omit,
+  }: {
+    data: CreateQueueDto;
+    include?: Prisma.QueueInclude;
+    omit?: Prisma.QueueOmit;
+  }): ReturnWithErrPromise<Queue> {
     try {
       const [checkedData, err] = await this.isPossibleToBook(data);
       if (err) throw err;
@@ -82,15 +94,21 @@ export class QueueService {
     }
   }
 
-  async update(
-    where: Prisma.QueueWhereUniqueInput,
-    data: UpdateQueueDto,
-    include?: Prisma.QueueInclude,
-    omit?: Prisma.QueueOmit,
-  ): ReturnWithErrPromise<Queue> {
+  async update({
+    where,
+    data,
+    include,
+    omit,
+  }: {
+    where: Prisma.QueueWhereUniqueInput;
+    data: UpdateQueueDto;
+    include?: Prisma.QueueInclude;
+    omit?: Prisma.QueueOmit;
+  }): ReturnWithErrPromise<Queue> {
     try {
-      const [queueToUpdate, updateErr] = await this.findOne(where, undefined, {
-        id: true,
+      const [queueToUpdate, updateErr] = await this.findOne({
+        where,
+        omit: { id: true },
       });
 
       if (updateErr) throw updateErr;
@@ -116,11 +134,15 @@ export class QueueService {
     }
   }
 
-  async delete(
-    where: Prisma.QueueWhereUniqueInput,
-    include?: Prisma.QueueInclude,
-    omit?: Prisma.QueueOmit,
-  ): ReturnWithErrPromise<Queue> {
+  async delete({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.QueueWhereUniqueInput;
+    include?: Prisma.QueueInclude;
+    omit?: Prisma.QueueOmit;
+  }): ReturnWithErrPromise<Queue> {
     try {
       const queue = await this.prisma.queue.delete({ where, include, omit });
 
@@ -139,7 +161,7 @@ export class QueueService {
   ): ReturnWithErrPromise<Prisma.QueueUncheckedCreateInput> {
     try {
       const [service, serviceError] = await this.serviceService.findOne({
-        id: data.serviceId,
+        where: { id: data.serviceId },
       });
 
       if (serviceError) throw serviceError;
@@ -149,12 +171,14 @@ export class QueueService {
       );
 
       const [bookedList, bookedErr] = await this.findMany({
-        userId: data.userId,
-        OR: [
-          { startAt: { lt: endAt }, endAt: { gte: endAt } },
-          { startAt: { lte: data.startAt }, endAt: { gt: data.startAt } },
-          { startAt: { gte: data.startAt }, endAt: { lte: endAt } },
-        ],
+        where: {
+          userId: data.userId,
+          OR: [
+            { startAt: { lt: endAt }, endAt: { gte: endAt } },
+            { startAt: { lte: data.startAt }, endAt: { gt: data.startAt } },
+            { startAt: { gte: data.startAt }, endAt: { lte: endAt } },
+          ],
+        },
       });
 
       if (bookedErr) throw bookedErr;

@@ -7,14 +7,14 @@ export class CategoryController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const [data, err] = await this.categoryService.findOne({ id });
+    const [data, err] = await this.categoryService.findOne({ where: { id } });
     if (err) throw err;
     return data;
   }
 
   @Get()
   async findMany() {
-    const [data, err] = await this.categoryService.findMany();
+    const [data, err] = await this.categoryService.findMany({});
     if (err) throw err;
     return data;
   }

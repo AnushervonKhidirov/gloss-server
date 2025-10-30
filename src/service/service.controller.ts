@@ -7,14 +7,14 @@ export class ServiceController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const [service, err] = await this.serviceService.findOne({ id });
+    const [service, err] = await this.serviceService.findOne({ where: { id } });
     if (err) throw err;
     return service;
   }
 
   @Get()
   async findMany() {
-    const [services, err] = await this.serviceService.findMany();
+    const [services, err] = await this.serviceService.findMany({});
     if (err) throw err;
     return services;
   }

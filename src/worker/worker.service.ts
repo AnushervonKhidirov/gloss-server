@@ -6,24 +6,24 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
 
-const fieldsToOmit: Prisma.UserOmit = {
-  username: true,
-  password: true,
-  role: true,
-  archived: true,
-};
-
 @Injectable()
 export class WorkerService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOne(
-    where: Prisma.UserWhereUniqueInput,
-  ): ReturnWithErrPromise<User> {
+  async findOne({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.UserWhereUniqueInput;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  }): ReturnWithErrPromise<User> {
     try {
       const user = await this.prisma.user.findUnique({
         where,
-        omit: fieldsToOmit,
+        include,
+        omit,
       });
 
       if (!user) throw new NotFoundException('User not found');
@@ -33,11 +33,20 @@ export class WorkerService {
     }
   }
 
-  async findMany(where?: Prisma.UserWhereInput): ReturnWithErrPromise<User[]> {
+  async findMany({
+    where,
+    include,
+    omit,
+  }: {
+    where?: Prisma.UserWhereInput;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  }): ReturnWithErrPromise<User[]> {
     try {
       const user = await this.prisma.user.findMany({
         where,
-        omit: fieldsToOmit,
+        include,
+        omit,
       });
 
       return [user, null];

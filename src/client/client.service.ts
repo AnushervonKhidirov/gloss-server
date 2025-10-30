@@ -17,11 +17,21 @@ import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
 export class ClientService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOne(
-    where: Prisma.ClientWhereUniqueInput,
-  ): ReturnWithErrPromise<Client> {
+  async findOne({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.ClientWhereUniqueInput;
+    include?: Prisma.ClientInclude;
+    omit?: Prisma.ClientOmit;
+  }): ReturnWithErrPromise<Client> {
     try {
-      const client = await this.prisma.client.findUnique({ where });
+      const client = await this.prisma.client.findUnique({
+        where,
+        include,
+        omit,
+      });
       if (!client) throw new NotFoundException('Client not found');
       return [client, null];
     } catch (err) {
@@ -29,20 +39,38 @@ export class ClientService {
     }
   }
 
-  async findMany(
-    where?: Prisma.ClientWhereInput,
-  ): ReturnWithErrPromise<Client[]> {
+  async findMany({
+    where,
+    include,
+    omit,
+  }: {
+    where?: Prisma.ClientWhereInput;
+    include?: Prisma.ClientInclude;
+    omit?: Prisma.ClientOmit;
+  }): ReturnWithErrPromise<Client[]> {
     try {
-      const clients = await this.prisma.client.findMany({ where });
+      const clients = await this.prisma.client.findMany({
+        where,
+        include,
+        omit,
+      });
       return [clients, null];
     } catch (err) {
       return exceptionHandler(err);
     }
   }
 
-  async create(data: CreateClientDto): ReturnWithErrPromise<Client> {
+  async create({
+    data,
+    include,
+    omit,
+  }: {
+    data: CreateClientDto;
+    include?: Prisma.ClientInclude;
+    omit?: Prisma.ClientOmit;
+  }): ReturnWithErrPromise<Client> {
     try {
-      const client = await this.prisma.client.create({ data });
+      const client = await this.prisma.client.create({ data, include, omit });
 
       if (!client) {
         throw new InternalServerErrorException("Can't add client");
@@ -54,12 +82,24 @@ export class ClientService {
     }
   }
 
-  async update(
-    where: Prisma.ClientWhereUniqueInput,
-    data: UpdateClientDto,
-  ): ReturnWithErrPromise<Client> {
+  async update({
+    where,
+    data,
+    include,
+    omit,
+  }: {
+    where: Prisma.ClientWhereUniqueInput;
+    data: UpdateClientDto;
+    include?: Prisma.ClientInclude;
+    omit?: Prisma.ClientOmit;
+  }): ReturnWithErrPromise<Client> {
     try {
-      const client = await this.prisma.client.update({ where, data });
+      const client = await this.prisma.client.update({
+        where,
+        data,
+        include,
+        omit,
+      });
 
       if (!client) {
         throw new InternalServerErrorException("Can't update client");
@@ -71,11 +111,17 @@ export class ClientService {
     }
   }
 
-  async delete(
-    where: Prisma.ClientWhereUniqueInput,
-  ): ReturnWithErrPromise<Client> {
+  async delete({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.ClientWhereUniqueInput;
+    include?: Prisma.ClientInclude;
+    omit?: Prisma.ClientOmit;
+  }): ReturnWithErrPromise<Client> {
     try {
-      const client = await this.prisma.client.delete({ where });
+      const client = await this.prisma.client.delete({ where, include, omit });
 
       if (!client) {
         throw new InternalServerErrorException("Can't delete client");

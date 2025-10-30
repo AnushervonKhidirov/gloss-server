@@ -1,3 +1,5 @@
+import type { Prisma } from 'generated/prisma/client';
+
 import {
   Controller,
   Get,
@@ -13,7 +15,6 @@ import { QueueService } from './queue.service';
 
 import { CreateQueueDto } from './dto/create-queue.dto';
 import { UpdateQueueDto } from './dto/update-queue.dto';
-import { Prisma } from 'generated/prisma/client';
 
 const queueIncludes: Prisma.QueueInclude = {
   client: true,
@@ -34,17 +35,20 @@ export class QueueController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const [queue, err] = await this.queueService.findOne({ id }, queueIncludes);
+    const [queue, err] = await this.queueService.findOne({
+      where: { id },
+      include: queueIncludes,
+    });
+
     if (err) throw err;
     return queue;
   }
 
   @Get()
   async findMany() {
-    const [queues, err] = await this.queueService.findMany(
-      undefined,
-      queueIncludes,
-    );
+    const [queues, err] = await this.queueService.findMany({
+      include: queueIncludes,
+    });
     if (err) throw err;
     return queues;
   }
@@ -53,7 +57,10 @@ export class QueueController {
   async create(
     @Body(new ValidationPipe({ transform: true })) data: CreateQueueDto,
   ) {
-    const [queue, err] = await this.queueService.create(data, queueIncludes);
+    const [queue, err] = await this.queueService.create({
+      data,
+      include: queueIncludes,
+    });
     if (err) throw err;
     return queue;
   }
@@ -63,18 +70,21 @@ export class QueueController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe({ transform: true })) data: UpdateQueueDto,
   ) {
-    const [queue, err] = await this.queueService.update(
-      { id },
+    const [queue, err] = await this.queueService.update({
+      where: { id },
       data,
-      queueIncludes,
-    );
+      include: queueIncludes,
+    });
     if (err) throw err;
     return queue;
   }
 
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const [queue, err] = await this.queueService.delete({ id }, queueIncludes);
+    const [queue, err] = await this.queueService.delete({
+      where: { id },
+      include: queueIncludes,
+    });
     if (err) throw err;
     return queue;
   }

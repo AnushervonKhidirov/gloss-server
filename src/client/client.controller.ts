@@ -20,21 +20,21 @@ export class ClientController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const [client, err] = await this.clientService.findOne({ id });
+    const [client, err] = await this.clientService.findOne({ where: { id } });
     if (err) throw err;
     return client;
   }
 
   @Get()
   async findMany() {
-    const [clients, err] = await this.clientService.findMany();
+    const [clients, err] = await this.clientService.findMany({});
     if (err) throw err;
     return clients;
   }
 
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateClientDto) {
-    const [client, err] = await this.clientService.create(data);
+    const [client, err] = await this.clientService.create({ data });
     if (err) throw err;
     return client;
   }
@@ -44,14 +44,17 @@ export class ClientController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe()) data: UpdateClientDto,
   ) {
-    const [client, err] = await this.clientService.update({ id }, data);
+    const [client, err] = await this.clientService.update({
+      where: { id },
+      data,
+    });
     if (err) throw err;
     return client;
   }
 
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const [client, err] = await this.clientService.delete({ id });
+    const [client, err] = await this.clientService.delete({ where: { id } });
     if (err) throw err;
     return client;
   }
