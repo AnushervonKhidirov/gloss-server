@@ -27,7 +27,7 @@ export class ClientController {
 
   @Get()
   async findMany() {
-    const [clients, err] = await this.clientService.findMany({});
+    const [clients, err] = await this.clientService.findMany();
     if (err) throw err;
     return clients;
   }

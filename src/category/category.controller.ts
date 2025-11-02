@@ -14,7 +14,7 @@ export class CategoryController {
 
   @Get()
   async findMany() {
-    const [data, err] = await this.categoryService.findMany({});
+    const [data, err] = await this.categoryService.findMany();
     if (err) throw err;
     return data;
   }

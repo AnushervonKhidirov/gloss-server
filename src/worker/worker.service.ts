@@ -41,7 +41,7 @@ export class WorkerService {
     where?: Prisma.UserWhereInput;
     include?: Prisma.UserInclude;
     omit?: Prisma.UserOmit;
-  }): ReturnWithErrPromise<User[]> {
+  } = {}): ReturnWithErrPromise<User[]> {
     try {
       const user = await this.prisma.user.findMany({
         where,

@@ -14,7 +14,7 @@ export class ServiceController {
 
   @Get()
   async findMany() {
-    const [services, err] = await this.serviceService.findMany({});
+    const [services, err] = await this.serviceService.findMany();
     if (err) throw err;
     return services;
   }

@@ -47,7 +47,7 @@ export class ClientService {
     where?: Prisma.ClientWhereInput;
     include?: Prisma.ClientInclude;
     omit?: Prisma.ClientOmit;
-  }): ReturnWithErrPromise<Client[]> {
+  } = {}): ReturnWithErrPromise<Client[]> {
     try {
       const clients = await this.prisma.client.findMany({
         where,

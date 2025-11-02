@@ -40,7 +40,7 @@ export class ServiceService {
     where?: Prisma.ServiceWhereInput;
     include?: Prisma.ServiceInclude;
     omit?: Prisma.ServiceOmit;
-  }): ReturnWithErrPromise<Service[]> {
+  } = {}): ReturnWithErrPromise<Service[]> {
     try {
       const service = await this.prisma.service.findMany({
         where,

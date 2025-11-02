@@ -52,7 +52,7 @@ export class QueueService {
     where?: Prisma.QueueWhereInput;
     include?: Prisma.QueueInclude;
     omit?: Prisma.QueueOmit;
-  }): ReturnWithErrPromise<Queue[]> {
+  } = {}): ReturnWithErrPromise<Queue[]> {
     try {
       const queue = await this.prisma.queue.findMany({
         where,

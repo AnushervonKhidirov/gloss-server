@@ -40,7 +40,7 @@ export class CategoryService {
     where?: Prisma.CategoryWhereInput;
     include?: Prisma.CategoryInclude;
     omit?: Prisma.CategoryOmit;
-  }): ReturnWithErrPromise<Category[]> {
+  } = {}): ReturnWithErrPromise<Category[]> {
     try {
       const category = await this.prisma.category.findMany({
         where,
