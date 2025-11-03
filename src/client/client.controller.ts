@@ -5,6 +5,7 @@ import {
   Patch,
   Delete,
   Param,
+  Query,
   Body,
   ParseIntPipe,
   ValidationPipe,
@@ -13,10 +14,22 @@ import { ClientService } from './client.service';
 
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { FindQueryClientDto } from './dto/find-query-client.dto';
 
 @Controller('client')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
+
+  @Get('/find')
+  async findOneQuery(
+    @Query(new ValidationPipe()) { phone }: FindQueryClientDto,
+  ) {
+    const [client, err] = await this.clientService.findOne({
+      where: { phone },
+    });
+    if (err) throw err;
+    return client;
+  }
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
