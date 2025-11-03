@@ -8,6 +8,8 @@ const fieldsToOmit: Prisma.UserOmit = {
   password: true,
   role: true,
   archived: true,
+  createdAt: true,
+  updatedAt: true,
 };
 
 @Controller('worker')
@@ -19,6 +21,10 @@ export class WorkerController {
     const [user, err] = await this.workerService.findOne({
       where: { id },
       omit: fieldsToOmit,
+      include: {
+        categories: { omit: { createdAt: true, updatedAt: true } },
+        queue: true,
+      },
     });
     if (err) throw err;
     return user;
@@ -28,6 +34,10 @@ export class WorkerController {
   async findMany() {
     const [users, err] = await this.workerService.findMany({
       omit: fieldsToOmit,
+      include: {
+        categories: { omit: { createdAt: true, updatedAt: true } },
+        queue: true,
+      },
     });
     if (err) throw err;
     return users;
