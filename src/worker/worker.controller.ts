@@ -51,7 +51,7 @@ export class WorkerController {
         queue: {
           where: {
             startAt: { gte: query.dateFrom },
-            endAt: { lt: query.dateTo },
+            endAt: { lte: query.dateTo },
           },
         },
       },
