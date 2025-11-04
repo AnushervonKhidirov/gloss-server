@@ -1,7 +1,16 @@
 import type { Prisma } from 'generated/prisma/client';
 
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  ParseIntPipe,
+  ValidationPipe,
+} from '@nestjs/common';
 import { WorkerService } from './worker.service';
+
+import { FindQueryWorkerDto } from './dto/find-query-worker.dto';
 
 const fieldsToOmit: Prisma.UserOmit = {
   username: true,
@@ -31,12 +40,20 @@ export class WorkerController {
   }
 
   @Get()
-  async findMany() {
+  async findMany(
+    @Query(new ValidationPipe({ transform: true })) query: FindQueryWorkerDto,
+  ) {
     const [users, err] = await this.workerService.findMany({
+      where: { categories: { some: { id: query.categoryId } } },
       omit: fieldsToOmit,
       include: {
         categories: { omit: { createdAt: true, updatedAt: true } },
-        queue: true,
+        queue: {
+          where: {
+            startAt: { gte: query.dateFrom },
+            endAt: { lt: query.dateTo },
+          },
+        },
       },
     });
     if (err) throw err;

@@ -20,17 +20,6 @@ import { FindQueryClientDto } from './dto/find-query-client.dto';
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
-  @Get('/find')
-  async findOneQuery(
-    @Query(new ValidationPipe()) { phone }: FindQueryClientDto,
-  ) {
-    const [client, err] = await this.clientService.findOne({
-      where: { phone },
-    });
-    if (err) throw err;
-    return client;
-  }
-
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [client, err] = await this.clientService.findOne({ where: { id } });
@@ -39,8 +28,8 @@ export class ClientController {
   }
 
   @Get()
-  async findMany() {
-    const [clients, err] = await this.clientService.findMany();
+  async findMany(@Query(new ValidationPipe()) where: FindQueryClientDto) {
+    const [clients, err] = await this.clientService.findMany({ where });
     if (err) throw err;
     return clients;
   }
