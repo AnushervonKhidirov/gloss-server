@@ -27,8 +27,6 @@ export function exceptionHandler(err: unknown): [null, HttpException] {
 }
 
 function prismaErrHandler(err: PrismaClientKnownRequestError) {
-  console.log(err);
-
   const Error: {
     [key: PrismaClientKnownRequestError['code']]: HttpException;
   } = {
