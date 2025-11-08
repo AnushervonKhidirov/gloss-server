@@ -3,7 +3,6 @@ import type { Prisma } from 'generated/prisma/client';
 import {
   Controller,
   Get,
-  Post,
   Param,
   Body,
   Query,
@@ -13,8 +12,6 @@ import {
 import { WorkerService } from './worker.service';
 
 import { FindQueryWorkerDto } from './dto/find-query-worker.dto';
-import { FindQueryWorkerServicePriceDto } from './dto/find-query-worker-service-price.dto';
-import { CreateWorkerServicePriceDto } from './dto/create-worker-service-price.dto';
 
 const fieldsToOmit: Prisma.UserOmit = {
   username: true,
@@ -28,40 +25,6 @@ const fieldsToOmit: Prisma.UserOmit = {
 @Controller('worker')
 export class WorkerController {
   constructor(private readonly workerService: WorkerService) {}
-
-  @Get('service')
-  async findWorkerServicePrice(
-    @Query(new ValidationPipe({ transform: true }))
-    { userId, serviceId }: FindQueryWorkerServicePriceDto,
-  ) {
-    const [service, err] = await this.workerService.findWorkerServicePrice({
-      where: { userId, serviceId },
-      include: {
-        service: { omit: { createdAt: true, updatedAt: true } },
-        user: { omit: fieldsToOmit },
-      },
-    });
-
-    if (err) throw err;
-    return service;
-  }
-
-  @Post('service')
-  async createWorkerServicePrice(
-    @Body(new ValidationPipe({ transform: true }))
-    data: CreateWorkerServicePriceDto,
-  ) {
-    const [service, err] = await this.workerService.createWorkerServicePrice({
-      data,
-      include: {
-        service: { omit: { createdAt: true, updatedAt: true } },
-        user: { omit: fieldsToOmit },
-      },
-    });
-
-    if (err) throw err;
-    return service;
-  }
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
