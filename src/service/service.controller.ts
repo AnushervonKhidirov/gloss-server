@@ -12,8 +12,8 @@ import {
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 
-import { CreateWorkerServicePriceDto } from './dto/create-worker-service-price.dto';
-import { FindQueryWorkerServicePriceDto } from './dto/find-query-worker-service-price.dto';
+import { CreateWorkerServiceDto } from './dto/create-worker-service-price.dto';
+import { FindQueryWorkerServiceDto } from './dto/find-query-worker-service-price.dto';
 
 const fieldsToOmit: Prisma.UserOmit = {
   username: true,
@@ -29,11 +29,11 @@ export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
   @Get('worker')
-  async findWorkerServicePrice(
+  async findWorkerService(
     @Query(new ValidationPipe({ transform: true }))
-    { userId, serviceId }: FindQueryWorkerServicePriceDto,
+    { userId, serviceId }: FindQueryWorkerServiceDto,
   ) {
-    const [service, err] = await this.serviceService.findWorkerServicePrice({
+    const [service, err] = await this.serviceService.findWorkerService({
       where: { userId, serviceId },
       include: {
         service: { omit: { createdAt: true, updatedAt: true } },
@@ -46,11 +46,11 @@ export class ServiceController {
   }
 
   @Post('worker')
-  async createWorkerServicePrice(
+  async createWorkerService(
     @Body(new ValidationPipe({ transform: true }))
-    data: CreateWorkerServicePriceDto,
+    data: CreateWorkerServiceDto,
   ) {
-    const [service, err] = await this.serviceService.createWorkerServicePrice({
+    const [service, err] = await this.serviceService.createWorkerService({
       data,
       include: {
         service: { omit: { createdAt: true, updatedAt: true } },

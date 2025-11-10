@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   Param,
-  Body,
   Query,
   ParseIntPipe,
   ValidationPipe,
@@ -32,7 +31,6 @@ export class WorkerController {
       where: { id },
       omit: fieldsToOmit,
       include: {
-        categories: { omit: { createdAt: true, updatedAt: true } },
         queue: true,
       },
     });
@@ -46,10 +44,17 @@ export class WorkerController {
     @Query(new ValidationPipe({ transform: true })) query: FindQueryWorkerDto,
   ) {
     const [users, err] = await this.workerService.findMany({
-      where: { categories: { some: { id: query.categoryId } } },
+      where: {
+        workerService: {
+          some: { userId: query.userId, serviceId: query.serviceId },
+        },
+      },
       omit: fieldsToOmit,
       include: {
-        categories: { omit: { createdAt: true, updatedAt: true } },
+        workerService: {
+          where: { serviceId: query.serviceId },
+          include: { service: { omit: { createdAt: true, updatedAt: true } } },
+        },
         queue: {
           where: {
             startAt: { gte: query.dateFrom },

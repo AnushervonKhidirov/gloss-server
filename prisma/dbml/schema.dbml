@@ -12,9 +12,8 @@ Table user {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   role Role [not null, default: 'WORKER']
-  categories categories [not null]
   queue queue [not null]
-  WorkerServicePrice worker_service_price [not null]
+  workerService worker_service [not null]
 }
 
 Table client {
@@ -37,7 +36,7 @@ Table services {
   category categories [not null]
   categoryId Int [not null]
   queue queue [not null]
-  WorkerServicePrice worker_service_price [not null]
+  workerService worker_service [not null]
 }
 
 Table categories {
@@ -45,7 +44,6 @@ Table categories {
   value String [unique, not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  user user [not null]
   services services [not null]
 }
 
@@ -61,23 +59,18 @@ Table queue {
   serviceId Int [not null]
 }
 
-Table worker_service_price {
+Table worker_service {
   id Int [pk, increment]
   user user [not null]
   userId Int [not null]
   service services [not null]
   serviceId Int [not null]
-  price Int [not null]
+  price Int
 }
 
 Table black_list {
   id Int [pk, increment]
   phone String [not null]
-}
-
-Table CategoryToUser {
-  categoriesId Int [ref: > categories.id]
-  userId Int [ref: > user.id]
 }
 
 Enum Role {
@@ -93,6 +86,6 @@ Ref: queue.clientId > client.id
 
 Ref: queue.serviceId > services.id
 
-Ref: worker_service_price.userId > user.id
+Ref: worker_service.userId > user.id
 
-Ref: worker_service_price.serviceId > services.id
+Ref: worker_service.serviceId > services.id

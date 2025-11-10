@@ -14,18 +14,17 @@ datasource db {
 }
 
 model User {
-  id                 Int                  @id @default(autoincrement())
-  username           String               @unique
-  password           String
-  firstName          String               @map("first_name") @db.VarChar(40)
-  lastName           String?              @map("last_name") @db.VarChar(40)
-  archived           Boolean              @default(false)
-  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt          DateTime             @updatedAt @map("updated_at") @db.Timestamp(0)
-  role               Role                 @default(WORKER)
-  categories         Category[]
-  queue              Queue[]
-  WorkerServicePrice WorkerServicePrice[]
+  id            Int             @id @default(autoincrement())
+  username      String          @unique
+  password      String
+  firstName     String          @map("first_name") @db.VarChar(40)
+  lastName      String?         @map("last_name") @db.VarChar(40)
+  archived      Boolean         @default(false)
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamp(0)
+  role          Role            @default(WORKER)
+  queue         Queue[]
+  workerService WorkerService[]
 
   @@map("user")
 }
@@ -42,17 +41,17 @@ model Client {
 }
 
 model Service {
-  id                 Int                  @id @default(autoincrement())
-  name               String               @unique @db.VarChar(40)
-  price              Int
-  desc               String?
-  duration           Int
-  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt          DateTime             @updatedAt @map("updated_at") @db.Timestamp(0)
-  category           Category             @relation(fields: [categoryId], references: [id])
-  categoryId         Int
-  queue              Queue[]
-  WorkerServicePrice WorkerServicePrice[]
+  id            Int             @id @default(autoincrement())
+  name          String          @unique @db.VarChar(40)
+  price         Int
+  desc          String?
+  duration      Int
+  createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamp(0)
+  category      Category        @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  queue         Queue[]
+  workerService WorkerService[]
 
   @@map("services")
 }
@@ -62,7 +61,6 @@ model Category {
   value     String    @unique @db.VarChar(40)
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamp(0)
-  user      User[]
   services  Service[]
 
   @@map("categories")
@@ -82,15 +80,15 @@ model Queue {
   @@map("queue")
 }
 
-model WorkerServicePrice {
+model WorkerService {
   id        Int     @id @default(autoincrement())
   user      User    @relation(fields: [userId], references: [id])
   userId    Int
   service   Service @relation(fields: [serviceId], references: [id])
   serviceId Int
-  price     Int
+  price     Int?
 
-  @@map("worker_service_price")
+  @@map("worker_service")
 }
 
 model BlackList {

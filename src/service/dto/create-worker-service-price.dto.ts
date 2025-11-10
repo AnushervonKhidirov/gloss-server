@@ -1,6 +1,6 @@
 import { IsNumber } from 'class-validator';
 
-export class CreateWorkerServicePriceDto {
+export class CreateWorkerServiceDto {
   @IsNumber()
   userId: number;
 

@@ -1,8 +1,4 @@
-import type {
-  Prisma,
-  Service,
-  WorkerServicePrice,
-} from 'generated/prisma/client';
+import type { Prisma, Service, WorkerService } from 'generated/prisma/client';
 import type { ReturnWithErrPromise } from 'src/common/type/return-with-err.type';
 
 import {
@@ -12,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-import { CreateWorkerServicePriceDto } from './dto/create-worker-service-price.dto';
+import { CreateWorkerServiceDto } from './dto/create-worker-service-price.dto';
 
 import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
 
@@ -63,17 +59,39 @@ export class ServiceService {
     }
   }
 
-  async findWorkerServicePrice({
+  async findAllWorkerService({
     where,
     include,
     omit,
   }: {
-    where: Prisma.WorkerServicePriceWhereInput;
-    include?: Prisma.WorkerServicePriceInclude;
-    omit?: Prisma.WorkerServicePriceOmit;
-  }): ReturnWithErrPromise<WorkerServicePrice> {
+    where: Prisma.WorkerServiceWhereInput;
+    include?: Prisma.WorkerServiceInclude;
+    omit?: Prisma.WorkerServiceOmit;
+  }): ReturnWithErrPromise<WorkerService[]> {
     try {
-      const service = await this.prisma.workerServicePrice.findFirstOrThrow({
+      const services = await this.prisma.workerService.findMany({
+        where,
+        include,
+        omit,
+      });
+
+      return [services, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
+
+  async findWorkerService({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.WorkerServiceWhereInput;
+    include?: Prisma.WorkerServiceInclude;
+    omit?: Prisma.WorkerServiceOmit;
+  }): ReturnWithErrPromise<WorkerService> {
+    try {
+      const service = await this.prisma.workerService.findFirstOrThrow({
         where,
         include,
         omit,
@@ -85,23 +103,23 @@ export class ServiceService {
     }
   }
 
-  async createWorkerServicePrice({
+  async createWorkerService({
     data,
     include,
     omit,
   }: {
-    data: CreateWorkerServicePriceDto;
-    include?: Prisma.WorkerServicePriceInclude;
-    omit?: Prisma.WorkerServicePriceOmit;
-  }): ReturnWithErrPromise<WorkerServicePrice> {
+    data: CreateWorkerServiceDto;
+    include?: Prisma.WorkerServiceInclude;
+    omit?: Prisma.WorkerServiceOmit;
+  }): ReturnWithErrPromise<WorkerService> {
     try {
-      const [check] = await this.findWorkerServicePrice({
+      const [check] = await this.findWorkerService({
         where: { userId: data.userId, serviceId: data.serviceId },
       });
 
       if (check) throw new ConflictException('Worker already has this service');
 
-      const service = await this.prisma.workerServicePrice.create({
+      const service = await this.prisma.workerService.create({
         data,
         include,
         omit,

@@ -15,5 +15,10 @@ export class FindQueryWorkerDto {
   @IsNumber()
   @Type(() => Number)
   @IsOptional()
-  categoryId?: number;
+  userId?: number;
+
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  serviceId?: number;
 }
