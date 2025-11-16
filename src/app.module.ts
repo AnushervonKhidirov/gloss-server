@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { TokenModule } from './token/token.module';
 import { CategoryModule } from './category/category.module';
 import { PrismaService } from './prisma/prisma.service';
 import { ServiceModule } from './service/service.module';
@@ -9,7 +13,11 @@ import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
+    AuthModule,
+    UserModule,
+    TokenModule,
     CategoryModule,
     ServiceModule,
     WorkerModule,
