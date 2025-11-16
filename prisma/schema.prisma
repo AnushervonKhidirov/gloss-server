@@ -19,12 +19,14 @@ model User {
   password      String
   firstName     String          @map("first_name") @db.VarChar(40)
   lastName      String?         @map("last_name") @db.VarChar(40)
+  verified      Boolean         @default(false)
   archived      Boolean         @default(false)
   createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamp(0)
   role          Role            @default(WORKER)
   queue         Queue[]
   workerService WorkerService[]
+  tokens        Token[]
 
   @@map("user")
 }
@@ -82,9 +84,9 @@ model Queue {
 
 model WorkerService {
   id        Int     @id @default(autoincrement())
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  service   Service @relation(fields: [serviceId], references: [id])
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   serviceId Int
   price     Int?
 
@@ -96,6 +98,15 @@ model BlackList {
   phone String @db.VarChar(40)
 
   @@map("black_list")
+}
+
+model Token {
+  refreshToken String   @id @unique @map("refresh_token") @db.VarChar(255)
+  userId       Int      @map("user_id")
+  expiredAt    DateTime @map("expired_at") @db.Timestamp(0)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("tokens")
 }
 
 enum Role {

@@ -8,12 +8,14 @@ Table user {
   password String [not null]
   firstName String [not null]
   lastName String
+  verified Boolean [not null, default: false]
   archived Boolean [not null, default: false]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   role Role [not null, default: 'WORKER']
   queue queue [not null]
   workerService worker_service [not null]
+  tokens tokens [not null]
 }
 
 Table client {
@@ -73,6 +75,13 @@ Table black_list {
   phone String [not null]
 }
 
+Table tokens {
+  refreshToken String [pk]
+  userId Int [not null]
+  expiredAt DateTime [not null]
+  user user [not null]
+}
+
 Enum Role {
   WORKER
   ADMIN
@@ -86,6 +95,8 @@ Ref: queue.clientId > client.id
 
 Ref: queue.serviceId > services.id
 
-Ref: worker_service.userId > user.id
+Ref: worker_service.userId > user.id [delete: Cascade]
 
-Ref: worker_service.serviceId > services.id
+Ref: worker_service.serviceId > services.id [delete: Cascade]
+
+Ref: tokens.userId > user.id [delete: Cascade]
