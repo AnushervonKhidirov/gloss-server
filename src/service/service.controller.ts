@@ -89,7 +89,11 @@ export class ServiceController {
 
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateServiceDto) {
-    const [services, err] = await this.serviceService.create(data);
+    const [services, err] = await this.serviceService.create({
+      data,
+      include: { category: { omit: { createdAt: true, updatedAt: true } } },
+      omit: { createdAt: true, updatedAt: true },
+    });
     if (err) throw err;
     return services;
   }
@@ -99,14 +103,19 @@ export class ServiceController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe()) data: CreateServiceDto,
   ) {
-    const [services, err] = await this.serviceService.update(id, data);
+    const [services, err] = await this.serviceService.update({
+      where: { id },
+      data,
+      include: { category: { omit: { createdAt: true, updatedAt: true } } },
+      omit: { createdAt: true, updatedAt: true },
+    });
     if (err) throw err;
     return services;
   }
 
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const [services, err] = await this.serviceService.delete(id);
+    const [services, err] = await this.serviceService.delete({ where: { id } });
     if (err) throw err;
     return services;
   }

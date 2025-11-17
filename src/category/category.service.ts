@@ -56,23 +56,20 @@ export class CategoryService {
     }
   }
 
-  async create(data: CreateCategoryDto): ReturnWithErrPromise<Category> {
+  async create({
+    data,
+    include,
+    omit,
+  }: {
+    data: CreateCategoryDto;
+    include?: Prisma.CategoryInclude;
+    omit?: Prisma.CategoryOmit;
+  }): ReturnWithErrPromise<Category> {
     try {
-      const category = await this.prisma.category.create({ data });
-      return [category, null];
-    } catch (err) {
-      return exceptionHandler(err);
-    }
-  }
-
-  async update(
-    id: number,
-    data: UpdateCategoryDto,
-  ): ReturnWithErrPromise<Category> {
-    try {
-      const category = await this.prisma.category.update({
-        where: { id },
+      const category = await this.prisma.category.create({
         data,
+        include,
+        omit,
       });
       return [category, null];
     } catch (err) {
@@ -80,9 +77,45 @@ export class CategoryService {
     }
   }
 
-  async delete(id: number): ReturnWithErrPromise<Category> {
+  async update({
+    where,
+    data,
+    include,
+    omit,
+  }: {
+    where: Prisma.CategoryWhereUniqueInput;
+    data: UpdateCategoryDto;
+    include?: Prisma.CategoryInclude;
+    omit?: Prisma.CategoryOmit;
+  }): ReturnWithErrPromise<Category> {
     try {
-      const category = await this.prisma.category.delete({ where: { id } });
+      const category = await this.prisma.category.update({
+        where,
+        data,
+        include,
+        omit,
+      });
+      return [category, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
+
+  async delete({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.CategoryWhereUniqueInput;
+    include?: Prisma.CategoryInclude;
+    omit?: Prisma.CategoryOmit;
+  }): ReturnWithErrPromise<Category> {
+    try {
+      const category = await this.prisma.category.delete({
+        where,
+        include,
+        omit,
+      });
       return [category, null];
     } catch (err) {
       return exceptionHandler(err);

@@ -61,30 +61,62 @@ export class ServiceService {
     }
   }
 
-  async create(data: CreateServiceDto): ReturnWithErrPromise<Service> {
+  async create({
+    data,
+    include,
+    omit,
+  }: {
+    data: CreateServiceDto;
+    include?: Prisma.ServiceInclude;
+    omit?: Prisma.ServiceOmit;
+  }): ReturnWithErrPromise<Service> {
     try {
-      const service = await this.prisma.service.create({ data });
+      const service = await this.prisma.service.create({ data, include, omit });
       return [service, null];
     } catch (err) {
       return exceptionHandler(err);
     }
   }
 
-  async update(
-    id: number,
-    data: UpdateServiceDto,
-  ): ReturnWithErrPromise<Service> {
+  async update({
+    where,
+    data,
+    include,
+    omit,
+  }: {
+    where: Prisma.ServiceWhereUniqueInput;
+    data: UpdateServiceDto;
+    include?: Prisma.ServiceInclude;
+    omit?: Prisma.ServiceOmit;
+  }): ReturnWithErrPromise<Service> {
     try {
-      const service = await this.prisma.service.update({ where: { id }, data });
+      const service = await this.prisma.service.update({
+        where,
+        data,
+        include,
+        omit,
+      });
       return [service, null];
     } catch (err) {
       return exceptionHandler(err);
     }
   }
 
-  async delete(id: number): ReturnWithErrPromise<Service> {
+  async delete({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.ServiceWhereUniqueInput;
+    include?: Prisma.ServiceInclude;
+    omit?: Prisma.ServiceOmit;
+  }): ReturnWithErrPromise<Service> {
     try {
-      const service = await this.prisma.service.delete({ where: { id } });
+      const service = await this.prisma.service.delete({
+        where,
+        include,
+        omit,
+      });
       return [service, null];
     } catch (err) {
       return exceptionHandler(err);

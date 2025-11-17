@@ -22,6 +22,7 @@ export class CategoryController {
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [category, err] = await this.categoryService.findOne({
       where: { id },
+      omit: { createdAt: true, updatedAt: true },
     });
     if (err) throw err;
     return category;
@@ -36,7 +37,10 @@ export class CategoryController {
 
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateCategoryDto) {
-    const [category, err] = await this.categoryService.create(data);
+    const [category, err] = await this.categoryService.create({
+      data,
+      omit: { createdAt: true, updatedAt: true },
+    });
     if (err) throw err;
     return category;
   }
@@ -46,14 +50,21 @@ export class CategoryController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe()) data: UpdateCategoryDto,
   ) {
-    const [category, err] = await this.categoryService.update(id, data);
+    const [category, err] = await this.categoryService.update({
+      where: { id },
+      data,
+      omit: { createdAt: true, updatedAt: true },
+    });
     if (err) throw err;
     return category;
   }
 
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const [category, err] = await this.categoryService.delete(id);
+    const [category, err] = await this.categoryService.delete({
+      where: { id },
+      omit: { createdAt: true, updatedAt: true },
+    });
     if (err) throw err;
     return category;
   }
