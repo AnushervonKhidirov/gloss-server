@@ -30,7 +30,9 @@ export class CategoryController {
 
   @Get()
   async findMany() {
-    const [categories, err] = await this.categoryService.findMany();
+    const [categories, err] = await this.categoryService.findMany({
+      omit: { createdAt: true, updatedAt: true },
+    });
     if (err) throw err;
     return categories;
   }
