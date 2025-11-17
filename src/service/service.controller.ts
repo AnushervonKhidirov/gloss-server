@@ -4,6 +4,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Param,
   Body,
   Query,
@@ -12,6 +14,8 @@ import {
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 
+import { CreateServiceDto } from './dto/create-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
 import { CreateWorkerServiceDto } from './dto/create-worker-service-price.dto';
 import { FindQueryWorkerServiceDto } from './dto/find-query-worker-service-price.dto';
 
@@ -79,6 +83,30 @@ export class ServiceController {
       include: { category: { omit: { createdAt: true, updatedAt: true } } },
       omit: { createdAt: true, updatedAt: true },
     });
+    if (err) throw err;
+    return services;
+  }
+
+  @Post()
+  async create(@Body(new ValidationPipe()) data: CreateServiceDto) {
+    const [services, err] = await this.serviceService.create(data);
+    if (err) throw err;
+    return services;
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ValidationPipe()) data: CreateServiceDto,
+  ) {
+    const [services, err] = await this.serviceService.update(id, data);
+    if (err) throw err;
+    return services;
+  }
+
+  @Delete(':id')
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    const [services, err] = await this.serviceService.delete(id);
     if (err) throw err;
     return services;
   }

@@ -11,8 +11,6 @@ import {
 } from 'generated/prisma/runtime/library';
 
 export function exceptionHandler(err: unknown): [null, HttpException] {
-  console.log(err);
-
   if (err instanceof HttpException) return [null, err];
   if (isPrismaError(err)) return [null, prismaErrHandler(err)];
 

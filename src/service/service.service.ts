@@ -8,6 +8,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+import { CreateServiceDto } from './dto/create-service.dto';
+import { UpdateServiceDto } from './dto/update-service.dto';
 import { CreateWorkerServiceDto } from './dto/create-worker-service-price.dto';
 
 import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
@@ -53,6 +55,36 @@ export class ServiceService {
         include,
         omit,
       });
+      return [service, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
+
+  async create(data: CreateServiceDto): ReturnWithErrPromise<Service> {
+    try {
+      const service = await this.prisma.service.create({ data });
+      return [service, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
+
+  async update(
+    id: number,
+    data: UpdateServiceDto,
+  ): ReturnWithErrPromise<Service> {
+    try {
+      const service = await this.prisma.service.update({ where: { id }, data });
+      return [service, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
+
+  async delete(id: number): ReturnWithErrPromise<Service> {
+    try {
+      const service = await this.prisma.service.delete({ where: { id } });
       return [service, null];
     } catch (err) {
       return exceptionHandler(err);
