@@ -1,4 +1,5 @@
 import type { Prisma } from 'generated/prisma/client';
+import type { UserTokenPayload } from 'src/token/type/token.type';
 
 import {
   Controller,
@@ -12,6 +13,9 @@ import {
   ParseIntPipe,
   ValidationPipe,
   UseGuards,
+  Req,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -58,9 +62,14 @@ export class ServiceController {
   @UseGuards(AuthGuard)
   @Post('worker')
   async createWorkerService(
+    @Req() request: Request,
     @Body(new ValidationPipe({ transform: true }))
     data: CreateWorkerServiceDto,
   ) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+    if (!userPayload) throw new UnauthorizedException();
+    if (+userPayload.sub !== data.userId) throw new ForbiddenException();
+
     const [service, err] = await this.serviceService.createWorkerService({
       data,
       include: {
