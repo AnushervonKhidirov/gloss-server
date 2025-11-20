@@ -11,7 +11,13 @@ import {
   Query,
   ParseIntPipe,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/role/role.guard';
+import { Roles } from 'src/role/role.decorator';
+
 import { ServiceService } from './service.service';
 
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -49,6 +55,7 @@ export class ServiceController {
     return service;
   }
 
+  @UseGuards(AuthGuard)
   @Post('worker')
   async createWorkerService(
     @Body(new ValidationPipe({ transform: true }))
@@ -87,6 +94,8 @@ export class ServiceController {
     return services;
   }
 
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateServiceDto) {
     const [services, err] = await this.serviceService.create({
@@ -98,10 +107,12 @@ export class ServiceController {
     return services;
   }
 
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ValidationPipe()) data: CreateServiceDto,
+    @Body(new ValidationPipe()) data: UpdateServiceDto,
   ) {
     const [services, err] = await this.serviceService.update({
       where: { id },
@@ -113,6 +124,8 @@ export class ServiceController {
     return services;
   }
 
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
     const [services, err] = await this.serviceService.delete({ where: { id } });
