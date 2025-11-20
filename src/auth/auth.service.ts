@@ -29,11 +29,12 @@ export class AuthService {
 
   async signUp(data: CreateUserDto): ReturnWithErrPromise<Tokens> {
     try {
-      const { username, firstName, lastName, password } = data;
+      const { username, phone, firstName, lastName, password } = data;
 
       const [user, err] = await this.userService.create({
         data: {
           username,
+          phone,
           firstName,
           lastName,
           password,

@@ -5,7 +5,7 @@ import { Client } from 'generated/prisma';
 
 export class CreateClientDto {
   @IsPhoneNumber('TJ')
-  @Transform(({ obj }: { obj: Client }) => {
+  @Transform(({ obj }) => {
     const formattedNumber = parsePhoneNumberFromString(
       obj.phone,
       'TJ',
