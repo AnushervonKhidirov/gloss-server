@@ -23,7 +23,9 @@ export class UserController {
 
   @Get()
   async findMany() {
-    const [users, err] = await this.userService.findMany();
+    const [users, err] = await this.userService.findMany({
+      omit: { password: true },
+    });
     if (err) throw err;
     return users;
   }
@@ -35,7 +37,8 @@ export class UserController {
     if (!userPayload) throw new UnauthorizedException();
 
     const [user, err] = await this.userService.findOne({
-      id: +userPayload.sub,
+      where: { id: +userPayload.sub },
+      omit: { password: true },
     });
 
     if (err) throw err;
@@ -44,7 +47,10 @@ export class UserController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const [user, err] = await this.userService.findOne({ id });
+    const [user, err] = await this.userService.findOne({
+      where: { id },
+      omit: { password: true },
+    });
     if (err) throw err;
     return user;
   }
@@ -52,16 +58,17 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Patch()
   async update(
-    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+    @Body(new ValidationPipe()) data: UpdateUserDto,
     @Req() request: Request,
   ) {
     const userPayload: UserTokenPayload | undefined = request['user'];
     if (!userPayload) throw new UnauthorizedException();
 
-    const [user, err] = await this.userService.update(
-      { id: +userPayload.sub },
-      updateUserDto,
-    );
+    const [user, err] = await this.userService.update({
+      where: { id: +userPayload.sub },
+      data,
+      omit: { password: true },
+    });
 
     if (err) throw err;
     return user;
@@ -74,7 +81,8 @@ export class UserController {
     if (!userPayload) throw new UnauthorizedException();
 
     const [user, err] = await this.userService.archive({
-      id: +userPayload.sub,
+      where: { id: +userPayload.sub },
+      omit: { password: true },
     });
     if (err) throw err;
 
@@ -88,7 +96,8 @@ export class UserController {
     if (!userPayload) throw new UnauthorizedException();
 
     const [user, err] = await this.userService.unarchive({
-      id: +userPayload.sub,
+      where: { id: +userPayload.sub },
+      omit: { password: true },
     });
     if (err) throw err;
 
