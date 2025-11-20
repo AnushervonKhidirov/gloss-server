@@ -146,6 +146,7 @@ export class AuthService {
   ): ReturnWithErrPromise<Tokens> {
     const payload: UserTokenPayload = {
       sub: user.id,
+      verified: user.verified,
       role: user.role,
     };
 

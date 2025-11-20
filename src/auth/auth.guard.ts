@@ -5,6 +5,7 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 
 import { TokenService } from 'src/token/token.service';
@@ -20,6 +21,10 @@ export class AuthGuard implements CanActivate {
 
     const [userPayload, err] = await this.tokenService.verifyAccessToken(token);
     if (err) throw err;
+
+    if (!userPayload.verified) {
+      throw new ForbiddenException('User is not verified');
+    }
 
     request['user'] = userPayload;
     return true;
