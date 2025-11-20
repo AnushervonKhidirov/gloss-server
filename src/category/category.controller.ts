@@ -8,7 +8,13 @@ import {
   Body,
   ParseIntPipe,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/role/role.guard';
+import { Roles } from 'src/role/role.decorator';
+
 import { CategoryService } from './category.service';
 
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -37,6 +43,8 @@ export class CategoryController {
     return categories;
   }
 
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateCategoryDto) {
     const [category, err] = await this.categoryService.create({
@@ -47,6 +55,8 @@ export class CategoryController {
     return category;
   }
 
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -61,6 +71,8 @@ export class CategoryController {
     return category;
   }
 
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
     const [category, err] = await this.categoryService.delete({
