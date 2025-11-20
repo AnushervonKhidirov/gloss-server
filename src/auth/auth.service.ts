@@ -27,19 +27,9 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async signUp({
-    username,
-    password,
-    firstName,
-    lastName,
-  }: CreateUserDto): ReturnWithErrPromise<Tokens> {
+  async signUp(data: CreateUserDto): ReturnWithErrPromise<Tokens> {
     try {
-      const [user, err] = await this.userService.create({
-        username,
-        password,
-        firstName,
-        lastName,
-      });
+      const [user, err] = await this.userService.create({ data });
 
       if (err) {
         if (err.getStatus() === 409) {
@@ -63,10 +53,10 @@ export class AuthService {
     password,
   }: SignInDto): ReturnWithErrPromise<Tokens> {
     try {
-      const [user, err] = await this.userService.findOne(
-        { username: username },
-        true,
-      );
+      const [user, err] = await this.userService.findOne({
+        where: { username },
+      });
+
       if (err) throw err;
 
       const isPasswordCorrect = await compare(password, user.password);

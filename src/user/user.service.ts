@@ -13,14 +13,20 @@ import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findOne<T extends boolean>(
-    where: Prisma.UserWhereUniqueInput,
-    withPassword?: T,
-  ): ReturnWithErrPromise<T extends true ? User : Omit<User, 'password'>> {
+  async findOne({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.UserWhereUniqueInput;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  }): ReturnWithErrPromise<User> {
     try {
       const user = await this.prisma.user.findUnique({
         where,
-        omit: { password: !withPassword },
+        include,
+        omit,
       });
 
       if (!user) throw new NotFoundException('User not found');
@@ -30,13 +36,20 @@ export class UserService {
     }
   }
 
-  async findMany(
-    where?: Prisma.UserWhereInput,
-  ): ReturnWithErrPromise<Omit<User, 'password'>[]> {
+  async findMany({
+    where,
+    include,
+    omit,
+  }: {
+    where?: Prisma.UserWhereInput;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  } = {}): ReturnWithErrPromise<Omit<User, 'password'>[]> {
     try {
       const users = await this.prisma.user.findMany({
         where,
-        omit: { password: true },
+        include,
+        omit,
       });
 
       return [users, null];
@@ -46,17 +59,22 @@ export class UserService {
   }
 
   async create({
-    username,
-    password,
-    firstName,
-    lastName,
-  }: CreateUserDto): ReturnWithErrPromise<Omit<User, 'password'>> {
+    data,
+    include,
+    omit,
+  }: {
+    data: CreateUserDto;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  }): ReturnWithErrPromise<Omit<User, 'password'>> {
     try {
+      const { username, firstName, lastName, password } = data;
       const hashedPassword = await hash(password, 10);
 
       const user = await this.prisma.user.create({
         data: { username, password: hashedPassword, firstName, lastName },
-        omit: { password: true },
+        include,
+        omit,
       });
 
       return [user, null];
@@ -65,17 +83,26 @@ export class UserService {
     }
   }
 
-  async update(
-    where: Prisma.UserWhereUniqueInput,
-    { username, password, firstName, lastName }: UpdateUserDto,
-  ): ReturnWithErrPromise<Omit<User, 'password'>> {
+  async update({
+    where,
+    data,
+    include,
+    omit,
+  }: {
+    where: Prisma.UserWhereUniqueInput;
+    data: UpdateUserDto;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  }): ReturnWithErrPromise<Omit<User, 'password'>> {
     try {
+      const { username, firstName, lastName, password } = data;
       const hashedPassword = password && (await hash(password, 10));
 
       const user = await this.prisma.user.update({
-        data: { username, firstName, lastName, password: hashedPassword },
         where,
-        omit: { password: true },
+        data: { username, firstName, lastName, password: hashedPassword },
+        include,
+        omit,
       });
 
       return [user, null];
@@ -84,14 +111,21 @@ export class UserService {
     }
   }
 
-  async archive(
-    where: Prisma.UserWhereUniqueInput,
-  ): ReturnWithErrPromise<Omit<User, 'password'>> {
+  async archive({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.UserWhereUniqueInput;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  }): ReturnWithErrPromise<Omit<User, 'password'>> {
     try {
       const user = await this.prisma.user.update({
         where,
         data: { archived: true },
-        omit: { password: true },
+        include,
+        omit,
       });
 
       return [user, null];
@@ -100,14 +134,21 @@ export class UserService {
     }
   }
 
-  async unarchive(
-    where: Prisma.UserWhereUniqueInput,
-  ): ReturnWithErrPromise<Omit<User, 'password'>> {
+  async unarchive({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.UserWhereUniqueInput;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  }): ReturnWithErrPromise<Omit<User, 'password'>> {
     try {
       const user = await this.prisma.user.update({
         where,
         data: { archived: false },
-        omit: { password: true },
+        include,
+        omit,
       });
 
       return [user, null];
@@ -116,13 +157,20 @@ export class UserService {
     }
   }
 
-  async delete(
-    where: Prisma.UserWhereUniqueInput,
-  ): ReturnWithErrPromise<Omit<User, 'password'>> {
+  async delete({
+    where,
+    include,
+    omit,
+  }: {
+    where: Prisma.UserWhereUniqueInput;
+    include?: Prisma.UserInclude;
+    omit?: Prisma.UserOmit;
+  }): ReturnWithErrPromise<Omit<User, 'password'>> {
     try {
       const deletedUser = await this.prisma.user.delete({
         where,
-        omit: { password: true },
+        include,
+        omit,
       });
 
       return [deletedUser, null];
