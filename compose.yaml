@@ -13,7 +13,6 @@ services:
         restart: true
     volumes:
       - .:/usr/app
-      - ./uploads:/usr/uploads
 
   dbadbmin:
     image: phpmyadmin:latest
