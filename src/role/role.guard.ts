@@ -18,13 +18,10 @@ export class RoleGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const roles = this.reflector.get(Roles, context.getHandler());
-    console.log(roles);
-
     if (!roles || !roles.length) return true;
 
     const request = context.switchToHttp().getRequest<Request>();
     const user = request['user'] as UserTokenPayload;
-    console.log(user);
 
     if (!user || !user.role) throw new UnauthorizedException();
     if (!roles.includes(user.role)) throw new ForbiddenException();
