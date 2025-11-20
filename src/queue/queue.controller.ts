@@ -1,4 +1,5 @@
 import type { Prisma } from 'generated/prisma/client';
+import type { UserTokenPayload } from 'src/token/type/token.type';
 
 import {
   Controller,
@@ -8,9 +9,17 @@ import {
   Delete,
   Param,
   Body,
+  Req,
   ParseIntPipe,
   ValidationPipe,
+  UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/role/role.guard';
+import { Roles } from 'src/role/role.decorator';
+
 import { QueueService } from './queue.service';
 
 import { CreateQueueDto } from './dto/create-queue.dto';
@@ -65,8 +74,43 @@ export class QueueController {
     return queue;
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
   async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ValidationPipe({ transform: true })) data: UpdateQueueDto,
+    @Req() request: Request,
+  ) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+    if (!userPayload) throw new UnauthorizedException();
+
+    const [queue, err] = await this.queueService.update({
+      where: { id, userId: +userPayload.sub },
+      data,
+      include: queueIncludes,
+    });
+    if (err) throw err;
+    return queue;
+  }
+
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+    if (!userPayload) throw new UnauthorizedException();
+
+    const [queue, err] = await this.queueService.delete({
+      where: { id, userId: +userPayload.sub },
+      include: queueIncludes,
+    });
+    if (err) throw err;
+    return queue;
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
+  @Patch('worker/:id')
+  async updateSelected(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe({ transform: true })) data: UpdateQueueDto,
   ) {
@@ -79,8 +123,10 @@ export class QueueController {
     return queue;
   }
 
-  @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number) {
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
+  @Delete('worker/:id')
+  async deleteSelected(@Param('id', ParseIntPipe) id: number) {
     const [queue, err] = await this.queueService.delete({
       where: { id },
       include: queueIncludes,
