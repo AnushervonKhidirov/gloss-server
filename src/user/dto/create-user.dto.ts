@@ -1,9 +1,9 @@
 import {
   IsNotEmpty,
+  IsOptional,
   IsString,
   MaxLength,
   MinLength,
-  ValidateIf,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -22,8 +22,8 @@ export class CreateUserDto {
   firstName: string;
 
   @IsString()
+  @IsOptional()
   @MaxLength(40)
   @IsNotEmpty()
-  @ValidateIf(({ lastName }) => lastName !== undefined)
   lastName?: string;
 }

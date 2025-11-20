@@ -8,14 +8,20 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Delete,
   Req,
   UnauthorizedException,
+  ForbiddenException,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/role/role.guard';
+import { Roles } from 'src/role/role.decorator';
+
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -26,6 +32,7 @@ export class UserController {
     const [users, err] = await this.userService.findMany({
       omit: { password: true },
     });
+
     if (err) throw err;
     return users;
   }
@@ -51,6 +58,31 @@ export class UserController {
       where: { id },
       omit: { password: true },
     });
+
+    if (err) throw err;
+    return user;
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
+  @Patch(':id')
+  async updateSelected(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ValidationPipe()) data: UpdateUserDto,
+    @Req() request: Request,
+  ) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+    if (!userPayload) throw new UnauthorizedException();
+    if (+userPayload.sub === id) throw new ForbiddenException();
+
+    const { username, firstName, lastName, password } = data;
+
+    const [user, err] = await this.userService.update({
+      where: { id },
+      data: { username, firstName, lastName, password },
+      omit: { password: true },
+    });
+
     if (err) throw err;
     return user;
   }
@@ -64,9 +96,32 @@ export class UserController {
     const userPayload: UserTokenPayload | undefined = request['user'];
     if (!userPayload) throw new UnauthorizedException();
 
+    const { username, firstName, lastName, password } = data;
+
     const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
-      data,
+      data: { username, firstName, lastName, password },
+      omit: { password: true },
+    });
+
+    if (err) throw err;
+    return user;
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
+  @Patch('archive/:id')
+  async archiveSelected(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: Request,
+  ) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+    if (!userPayload) throw new UnauthorizedException();
+    if (+userPayload.sub === id) throw new ForbiddenException();
+
+    const [user, err] = await this.userService.update({
+      where: { id },
+      data: { archived: true },
       omit: { password: true },
     });
 
@@ -76,16 +131,39 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Patch('archive')
-  async arcive(@Req() request: Request) {
+  async archive(@Req() request: Request) {
     const userPayload: UserTokenPayload | undefined = request['user'];
     if (!userPayload) throw new UnauthorizedException();
 
-    const [user, err] = await this.userService.archive({
+    const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
+      data: { archived: true },
       omit: { password: true },
     });
-    if (err) throw err;
 
+    if (err) throw err;
+    return user;
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
+  @Patch('unarchive/:id')
+  async unarchiveSelected(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: Request,
+  ) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+
+    if (!userPayload) throw new UnauthorizedException();
+    if (+userPayload.sub === id) throw new ForbiddenException();
+
+    const [user, err] = await this.userService.update({
+      where: { id },
+      data: { archived: false },
+      omit: { password: true },
+    });
+
+    if (err) throw err;
     return user;
   }
 
@@ -95,12 +173,52 @@ export class UserController {
     const userPayload: UserTokenPayload | undefined = request['user'];
     if (!userPayload) throw new UnauthorizedException();
 
-    const [user, err] = await this.userService.unarchive({
+    const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
+      data: { archived: false },
       omit: { password: true },
     });
-    if (err) throw err;
 
+    if (err) throw err;
+    return user;
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
+  @Patch('verify/:id')
+  async verifyUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: Request,
+  ) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+
+    if (!userPayload) throw new UnauthorizedException();
+    if (+userPayload.sub === id) throw new ForbiddenException();
+
+    const [user, err] = await this.userService.update({
+      where: { id },
+      data: { verified: true },
+      omit: { password: true },
+    });
+
+    if (err) throw err;
+    return user;
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
+  @Delete('delete/:id')
+  async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+    if (!userPayload) throw new UnauthorizedException();
+    if (+userPayload.sub === id) throw new ForbiddenException();
+
+    const [user, err] = await this.userService.delete({
+      where: { id },
+      omit: { password: true },
+    });
+
+    if (err) throw err;
     return user;
   }
 }

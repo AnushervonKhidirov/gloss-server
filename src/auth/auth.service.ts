@@ -29,7 +29,16 @@ export class AuthService {
 
   async signUp(data: CreateUserDto): ReturnWithErrPromise<Tokens> {
     try {
-      const [user, err] = await this.userService.create({ data });
+      const { username, firstName, lastName, password } = data;
+
+      const [user, err] = await this.userService.create({
+        data: {
+          username,
+          firstName,
+          lastName,
+          password,
+        },
+      });
 
       if (err) {
         if (err.getStatus() === 409) {
