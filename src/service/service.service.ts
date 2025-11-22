@@ -170,9 +170,13 @@ export class ServiceService {
   async workerServiceHandler({
     userId,
     data,
+    include,
+    omit,
   }: {
     userId: number;
     data: WorkerServiceDto[];
+    include?: Prisma.WorkerServiceInclude;
+    omit?: Prisma.WorkerServiceOmit;
   }): ReturnWithErrPromise<WorkerService[]> {
     try {
       const [services, findError] = await this.findWorkerServices({
@@ -206,10 +210,6 @@ export class ServiceService {
 
       await this.prisma.workerService.createMany({ data: toCreate });
 
-      await this.prisma.workerService.deleteMany({
-        where: { id: { in: toDelete.map((service) => service.id) } },
-      });
-
       for (const data of toUpdate) {
         await this.prisma.workerService.update({
           where: { id: data.id },
@@ -217,8 +217,14 @@ export class ServiceService {
         });
       }
 
+      await this.prisma.workerService.deleteMany({
+        where: { id: { in: toDelete.map((service) => service.id) } },
+      });
+
       const result = await this.prisma.workerService.findMany({
         where: { userId },
+        include,
+        omit,
       });
 
       return [result, null];

@@ -50,8 +50,10 @@ export class ServiceController {
     const [service, err] = await this.serviceService.findWorkerServices({
       where: { userId, serviceId },
       include: {
-        service: { omit: { createdAt: true, updatedAt: true } },
-        user: { omit: fieldsToOmit },
+        service: {
+          omit: { createdAt: true, updatedAt: true },
+          include: { category: { omit: { createdAt: true, updatedAt: true } } },
+        },
       },
     });
 
@@ -72,6 +74,12 @@ export class ServiceController {
     const [services, err] = await this.serviceService.workerServiceHandler({
       userId: +userPayload.sub,
       data,
+      include: {
+        service: {
+          omit: { createdAt: true, updatedAt: true },
+          include: { category: { omit: { createdAt: true, updatedAt: true } } },
+        },
+      },
     });
 
     if (err) throw err;
