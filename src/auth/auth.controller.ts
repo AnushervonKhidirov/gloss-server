@@ -18,15 +18,14 @@ export class AuthController {
   @Post('sign-up')
   @HttpCode(200)
   async signUp(@Body(new ValidationPipe()) createUserDto: CreateUserDto) {
-    const [token, err] = await this.authService.signUp(createUserDto);
+    const [_, err] = await this.authService.signUp(createUserDto);
     if (err) throw err;
-    return token;
   }
 
   @Post('sign-in')
   @HttpCode(200)
   async signIn(@Body(new ValidationPipe()) signInDto: SignInDto) {
-    const [token, err] = await this.authService.signIn(signInDto);
+    const [token, err] = await this.authService.signIn(signInDto, true);
     if (err) throw err;
     return token;
   }

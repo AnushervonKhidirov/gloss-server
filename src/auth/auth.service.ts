@@ -5,6 +5,7 @@ import type { Tokens, UserTokenPayload } from 'src/token/type/token.type';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   Injectable,
   InternalServerErrorException,
@@ -27,11 +28,11 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async signUp(data: CreateUserDto): ReturnWithErrPromise<Tokens> {
+  async signUp(data: CreateUserDto): ReturnWithErrPromise<null> {
     try {
       const { username, phone, firstName, lastName, password } = data;
 
-      const [user, err] = await this.userService.create({
+      const [_, err] = await this.userService.create({
         data: {
           username,
           phone,
@@ -49,19 +50,16 @@ export class AuthService {
         throw err;
       }
 
-      const [token, tokenErr] = await this.createTokens(user);
-      if (tokenErr) throw tokenErr;
-
-      return [token, null];
+      return [null, null];
     } catch (err) {
       return exceptionHandler(err);
     }
   }
 
-  async signIn({
-    username,
-    password,
-  }: SignInDto): ReturnWithErrPromise<Tokens> {
+  async signIn(
+    { username, password }: SignInDto,
+    verificationCheck?: boolean,
+  ): ReturnWithErrPromise<Tokens> {
     try {
       const [user, err] = await this.userService.findOne({
         where: { username },
@@ -71,6 +69,8 @@ export class AuthService {
 
       const isPasswordCorrect = await compare(password, user.password);
       if (!isPasswordCorrect) throw new BadRequestException('Wrong password');
+
+      if (verificationCheck && !user.verified) throw new ForbiddenException();
 
       const [token, tokenErr] = await this.createTokens(user);
       if (tokenErr) throw tokenErr;
