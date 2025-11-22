@@ -26,7 +26,7 @@ import { ServiceService } from './service.service';
 
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
-import { CreateWorkerServiceDto } from './dto/create-worker-service-price.dto';
+import { WorkerServiceDto } from './dto/worker-service-price.dto';
 import { FindQueryWorkerServiceDto } from './dto/find-query-worker-service-price.dto';
 
 const fieldsToOmit: Prisma.UserOmit = {
@@ -43,11 +43,11 @@ export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
   @Get('worker')
-  async findWorkerService(
+  async findWorkerServices(
     @Query(new ValidationPipe({ transform: true }))
     { userId, serviceId }: FindQueryWorkerServiceDto,
   ) {
-    const [service, err] = await this.serviceService.findWorkerService({
+    const [service, err] = await this.serviceService.findWorkerServices({
       where: { userId, serviceId },
       include: {
         service: { omit: { createdAt: true, updatedAt: true } },
@@ -61,25 +61,21 @@ export class ServiceController {
 
   @UseGuards(AuthGuard)
   @Post('worker')
-  async createWorkerService(
+  async workerServiceHandler(
     @Req() request: Request,
     @Body(new ValidationPipe({ transform: true }))
-    data: CreateWorkerServiceDto,
+    data: WorkerServiceDto[],
   ) {
     const userPayload: UserTokenPayload | undefined = request['user'];
     if (!userPayload) throw new UnauthorizedException();
-    if (+userPayload.sub !== data.userId) throw new ForbiddenException();
 
-    const [service, err] = await this.serviceService.createWorkerService({
+    const [services, err] = await this.serviceService.workerServiceHandler({
+      userId: +userPayload.sub,
       data,
-      include: {
-        service: { omit: { createdAt: true, updatedAt: true } },
-        user: { omit: fieldsToOmit },
-      },
     });
 
     if (err) throw err;
-    return service;
+    return services;
   }
 
   @Get(':id')

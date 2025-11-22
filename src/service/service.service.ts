@@ -10,7 +10,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
-import { CreateWorkerServiceDto } from './dto/create-worker-service-price.dto';
+import { WorkerServiceDto } from './dto/worker-service-price.dto';
 
 import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
 
@@ -145,7 +145,7 @@ export class ServiceService {
     }
   }
 
-  async findWorkerService({
+  async findWorkerServices({
     where,
     include,
     omit,
@@ -153,43 +153,75 @@ export class ServiceService {
     where: Prisma.WorkerServiceWhereInput;
     include?: Prisma.WorkerServiceInclude;
     omit?: Prisma.WorkerServiceOmit;
-  }): ReturnWithErrPromise<WorkerService> {
+  }): ReturnWithErrPromise<WorkerService[]> {
     try {
-      const service = await this.prisma.workerService.findFirstOrThrow({
+      const services = await this.prisma.workerService.findMany({
         where,
         include,
         omit,
       });
 
-      return [service, null];
+      return [services, null];
     } catch (err) {
       return exceptionHandler(err);
     }
   }
 
-  async createWorkerService({
+  async workerServiceHandler({
+    userId,
     data,
-    include,
-    omit,
   }: {
-    data: CreateWorkerServiceDto;
-    include?: Prisma.WorkerServiceInclude;
-    omit?: Prisma.WorkerServiceOmit;
-  }): ReturnWithErrPromise<WorkerService> {
+    userId: number;
+    data: WorkerServiceDto[];
+  }): ReturnWithErrPromise<WorkerService[]> {
     try {
-      const [check] = await this.findWorkerService({
-        where: { userId: data.userId, serviceId: data.serviceId },
+      const [services, findError] = await this.findWorkerServices({
+        where: { userId: userId },
       });
 
-      if (check) throw new ConflictException('Worker already has this service');
+      if (findError) throw findError;
 
-      const service = await this.prisma.workerService.create({
-        data,
-        include,
-        omit,
+      const toCreate: Prisma.WorkerServiceCreateManyInput[] = [];
+      const toUpdate: { id: number; price: number | null }[] = [];
+      const toDelete = [...services];
+
+      for (const workerService of data) {
+        const foundIndex = toDelete.findIndex(
+          (service) =>
+            service.userId === userId &&
+            service.serviceId === workerService.serviceId,
+        );
+
+        if (foundIndex !== -1) {
+          const service = toDelete.splice(foundIndex, 1)[0];
+
+          toUpdate.push({
+            ...service,
+            price: workerService.price ?? null,
+          });
+        } else {
+          toCreate.push({ ...workerService, userId });
+        }
+      }
+
+      await this.prisma.workerService.createMany({ data: toCreate });
+
+      await this.prisma.workerService.deleteMany({
+        where: { id: { in: toDelete.map((service) => service.id) } },
       });
 
-      return [service, null];
+      for (const data of toUpdate) {
+        await this.prisma.workerService.update({
+          where: { id: data.id },
+          data,
+        });
+      }
+
+      const result = await this.prisma.workerService.findMany({
+        where: { userId },
+      });
+
+      return [result, null];
     } catch (err) {
       return exceptionHandler(err);
     }
