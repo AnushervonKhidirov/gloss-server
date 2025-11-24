@@ -92,7 +92,7 @@ export class ServiceService {
     try {
       const service = await this.prisma.service.update({
         where,
-        data,
+        data: { ...data, desc: data.desc ?? null },
         include,
         omit,
       });
