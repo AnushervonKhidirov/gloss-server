@@ -5,15 +5,15 @@ export class QueryQueueDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  userId: number;
+  userId?: number;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  clientId: number;
+  clientId?: number;
 
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  serviceId: number;
+  serviceId?: number;
 }
