@@ -185,7 +185,7 @@ export class UserController {
 
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(['ADMIN'])
-  @Patch('verify/:id')
+  @Patch('approve/:id')
   async verifyUser(
     @Param('id', ParseIntPipe) id: number,
     @Req() request: Request,

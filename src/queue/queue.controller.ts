@@ -9,6 +9,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   Req,
   ParseIntPipe,
   ValidationPipe,
@@ -24,6 +25,7 @@ import { QueueService } from './queue.service';
 
 import { CreateQueueDto } from './dto/create-queue.dto';
 import { UpdateQueueDto } from './dto/update-queue.dto';
+import { QueryQueueDto } from './dto/query-queue.dto';
 
 const queueIncludes: Prisma.QueueInclude = {
   client: true,
@@ -54,8 +56,11 @@ export class QueueController {
   }
 
   @Get()
-  async findMany() {
+  async findMany(
+    @Query(new ValidationPipe({ transform: true })) query: QueryQueueDto,
+  ) {
     const [queues, err] = await this.queueService.findMany({
+      where: query,
       include: queueIncludes,
     });
     if (err) throw err;
@@ -94,13 +99,16 @@ export class QueueController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
+  @Delete(':queueId')
+  async delete(
+    @Param('queueId', ParseIntPipe) queueId: number,
+    @Req() request: Request,
+  ) {
     const userPayload: UserTokenPayload | undefined = request['user'];
     if (!userPayload) throw new UnauthorizedException();
 
     const [queue, err] = await this.queueService.delete({
-      where: { id, userId: +userPayload.sub },
+      where: { id: queueId, userId: +userPayload.sub },
       include: queueIncludes,
     });
     if (err) throw err;
@@ -109,13 +117,13 @@ export class QueueController {
 
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(['ADMIN'])
-  @Patch('worker/:id')
+  @Patch('worker/:queueId')
   async updateSelected(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('queueId', ParseIntPipe) queueId: number,
     @Body(new ValidationPipe({ transform: true })) data: UpdateQueueDto,
   ) {
     const [queue, err] = await this.queueService.update({
-      where: { id },
+      where: { id: queueId },
       data,
       include: queueIncludes,
     });
@@ -125,10 +133,10 @@ export class QueueController {
 
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(['ADMIN'])
-  @Delete('worker/:id')
-  async deleteSelected(@Param('id', ParseIntPipe) id: number) {
+  @Delete('worker/:queueId')
+  async deleteSelected(@Param('queueId', ParseIntPipe) queueId: number) {
     const [queue, err] = await this.queueService.delete({
-      where: { id },
+      where: { id: queueId },
       include: queueIncludes,
     });
     if (err) throw err;
