@@ -44,6 +44,20 @@ const queueIncludes: Prisma.QueueInclude = {
 export class QueueController {
   constructor(private readonly queueService: QueueService) {}
 
+  @UseGuards(AuthGuard)
+  @Get('my')
+  async findMyQueue(@Req() request: Request) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+    if (!userPayload) throw new UnauthorizedException();
+
+    const [queues, err] = await this.queueService.findMany({
+      where: { userId: +userPayload.sub },
+      include: queueIncludes,
+    });
+    if (err) throw err;
+    return queues;
+  }
+
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [queue, err] = await this.queueService.findOne({
@@ -57,10 +71,15 @@ export class QueueController {
 
   @Get()
   async findMany(
-    @Query(new ValidationPipe({ transform: true })) query: FindQueryQueueDto,
+    @Query(new ValidationPipe({ transform: true }))
+    { userId, exceptUserId, clientId, serviceId }: FindQueryQueueDto,
   ) {
     const [queues, err] = await this.queueService.findMany({
-      where: query,
+      where: {
+        userId: { equals: userId, not: exceptUserId },
+        clientId: clientId,
+        serviceId: serviceId,
+      },
       include: queueIncludes,
     });
     if (err) throw err;

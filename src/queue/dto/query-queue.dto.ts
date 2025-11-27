@@ -10,6 +10,11 @@ export class FindQueryQueueDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
+  exceptUserId?: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
   clientId?: number;
 
   @IsNumber()

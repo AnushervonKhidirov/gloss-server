@@ -42,6 +42,27 @@ const fieldsToOmit: Prisma.UserOmit = {
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
+  @UseGuards(AuthGuard)
+  @Get('worker/my')
+  async findMyServices(@Req() request: Request) {
+    const userPayload: UserTokenPayload | undefined = request['user'];
+    if (!userPayload) throw new UnauthorizedException();
+
+    const [service, err] = await this.serviceService.findWorkerServices({
+      where: { userId: +userPayload.sub },
+      include: {
+        service: {
+          omit: { createdAt: true, updatedAt: true },
+          include: { category: { omit: { createdAt: true, updatedAt: true } } },
+        },
+      },
+    });
+
+    if (err) throw err;
+    return service;
+  }
+
+  @UseGuards(AuthGuard)
   @Get('worker')
   async findWorkerServices(
     @Query(new ValidationPipe({ transform: true }))
