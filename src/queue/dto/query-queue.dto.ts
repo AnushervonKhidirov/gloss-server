@@ -1,7 +1,7 @@
 import { IsNumber, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class QueryQueueDto {
+export class FindQueryQueueDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)

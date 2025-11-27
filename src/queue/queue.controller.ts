@@ -25,7 +25,7 @@ import { QueueService } from './queue.service';
 
 import { CreateQueueDto } from './dto/create-queue.dto';
 import { UpdateQueueDto } from './dto/update-queue.dto';
-import { QueryQueueDto } from './dto/query-queue.dto';
+import { FindQueryQueueDto } from './dto/query-queue.dto';
 
 const queueIncludes: Prisma.QueueInclude = {
   client: true,
@@ -57,7 +57,7 @@ export class QueueController {
 
   @Get()
   async findMany(
-    @Query(new ValidationPipe({ transform: true })) query: QueryQueueDto,
+    @Query(new ValidationPipe({ transform: true })) query: FindQueryQueueDto,
   ) {
     const [queues, err] = await this.queueService.findMany({
       where: query,
