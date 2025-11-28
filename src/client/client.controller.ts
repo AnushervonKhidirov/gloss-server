@@ -9,7 +9,13 @@ import {
   Body,
   ParseIntPipe,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common';
+
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RoleGuard } from 'src/role/role.guard';
+import { Roles } from 'src/role/role.decorator';
+
 import { ClientService } from './client.service';
 
 import { CreateClientDto } from './dto/create-client.dto';
@@ -22,25 +28,39 @@ export class ClientController {
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const [client, err] = await this.clientService.findOne({ where: { id } });
+    const [client, err] = await this.clientService.findOne({
+      where: { id },
+      omit: { createdAt: true, updatedAt: true },
+    });
+
     if (err) throw err;
     return client;
   }
 
   @Get()
   async findMany(@Query(new ValidationPipe()) where: FindQueryClientDto) {
-    const [clients, err] = await this.clientService.findMany({ where });
+    const [clients, err] = await this.clientService.findMany({
+      where,
+      omit: { createdAt: true, updatedAt: true },
+    });
+
     if (err) throw err;
     return clients;
   }
 
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateClientDto) {
-    const [client, err] = await this.clientService.create({ data });
+    const [client, err] = await this.clientService.create({
+      data,
+      omit: { createdAt: true, updatedAt: true },
+    });
+
     if (err) throw err;
     return client;
   }
 
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -49,14 +69,22 @@ export class ClientController {
     const [client, err] = await this.clientService.update({
       where: { id },
       data,
+      omit: { createdAt: true, updatedAt: true },
     });
+
     if (err) throw err;
     return client;
   }
 
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['ADMIN'])
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const [client, err] = await this.clientService.delete({ where: { id } });
+    const [client, err] = await this.clientService.delete({
+      where: { id },
+      omit: { createdAt: true, updatedAt: true },
+    });
+
     if (err) throw err;
     return client;
   }
