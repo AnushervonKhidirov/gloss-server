@@ -25,7 +25,10 @@ import { QueueService } from './queue.service';
 
 import { CreateQueueDto } from './dto/create-queue.dto';
 import { UpdateQueueDto } from './dto/update-queue.dto';
-import { FindQueryQueueDto } from './dto/query-queue.dto';
+import {
+  FindQueryQueueDto,
+  FindMyQueryQueueDto,
+} from './dto/find-query-queue.dto';
 
 const queueIncludes: Prisma.QueueInclude = {
   client: true,
@@ -46,12 +49,21 @@ export class QueueController {
 
   @UseGuards(AuthGuard)
   @Get('my')
-  async findMyQueue(@Req() request: Request) {
+  async findMyQueue(
+    @Req() request: Request,
+    @Query(new ValidationPipe({ transform: true }))
+    { clientId, serviceId, fromDate }: FindMyQueryQueueDto,
+  ) {
     const userPayload: UserTokenPayload | undefined = request['user'];
     if (!userPayload) throw new UnauthorizedException();
 
     const [queues, err] = await this.queueService.findMany({
-      where: { userId: +userPayload.sub },
+      where: {
+        userId: +userPayload.sub,
+        clientId: clientId,
+        serviceId: serviceId,
+        startAt: { gte: fromDate },
+      },
       include: queueIncludes,
     });
     if (err) throw err;
@@ -72,13 +84,14 @@ export class QueueController {
   @Get()
   async findMany(
     @Query(new ValidationPipe({ transform: true }))
-    { userId, exceptUserId, clientId, serviceId }: FindQueryQueueDto,
+    { userId, exceptUserId, clientId, serviceId, fromDate }: FindQueryQueueDto,
   ) {
     const [queues, err] = await this.queueService.findMany({
       where: {
         userId: { equals: userId, not: exceptUserId },
         clientId: clientId,
         serviceId: serviceId,
+        startAt: { gte: fromDate },
       },
       include: queueIncludes,
     });
