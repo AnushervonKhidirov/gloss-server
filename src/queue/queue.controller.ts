@@ -131,16 +131,13 @@ export class QueueController {
   }
 
   @UseGuards(AuthGuard)
-  @Delete(':queueId')
-  async delete(
-    @Param('queueId', ParseIntPipe) queueId: number,
-    @Req() request: Request,
-  ) {
+  @Delete(':id')
+  async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
     const userPayload: UserTokenPayload | undefined = request['user'];
     if (!userPayload) throw new UnauthorizedException();
 
     const [queue, err] = await this.queueService.delete({
-      where: { id: queueId, userId: +userPayload.sub },
+      where: { id, userId: +userPayload.sub },
       include: queueIncludes,
     });
     if (err) throw err;
