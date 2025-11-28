@@ -45,12 +45,12 @@ export class CategoryService {
     omit?: Prisma.CategoryOmit;
   } = {}): ReturnWithErrPromise<Category[]> {
     try {
-      const category = await this.prisma.category.findMany({
+      const categories = await this.prisma.category.findMany({
         where,
         include,
         omit,
       });
-      return [category, null];
+      return [categories, null];
     } catch (err) {
       return exceptionHandler(err);
     }

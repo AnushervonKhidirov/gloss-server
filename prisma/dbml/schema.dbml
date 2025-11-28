@@ -14,6 +14,8 @@ Table user {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   role Role [not null, default: 'WORKER']
+  specialtyId Int
+  specialty specialty
   queue queue [not null]
   workerService worker_service [not null]
   tokens tokens [not null]
@@ -71,6 +73,14 @@ Table worker_service {
   price Int
 }
 
+Table specialty {
+  id Int [pk, increment]
+  value String [unique, not null]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  users user [not null]
+}
+
 Table black_list {
   id Int [pk, increment]
   phone String [not null]
@@ -87,6 +97,8 @@ Enum Role {
   WORKER
   ADMIN
 }
+
+Ref: user.specialtyId > specialty.id
 
 Ref: services.categoryId > categories.id
 

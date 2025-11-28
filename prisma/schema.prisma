@@ -25,6 +25,8 @@ model User {
   createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamp(0)
   role          Role            @default(WORKER)
+  specialtyId   Int?            @map("specialty_id")
+  specialty     Specialty?      @relation(fields: [specialtyId], references: [id])
   queue         Queue[]
   workerService WorkerService[]
   tokens        Token[]
@@ -92,6 +94,16 @@ model WorkerService {
   price     Int?
 
   @@map("worker_service")
+}
+
+model Specialty {
+  id        Int      @id @default(autoincrement())
+  value     String   @unique @db.VarChar(60)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
+  users     User[]
+
+  @@map("specialty")
 }
 
 model BlackList {

@@ -22,6 +22,17 @@ import { Roles } from 'src/role/role.decorator';
 
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Prisma } from 'generated/prisma/client';
+
+const userInclude: Prisma.UserInclude = {
+  specialty: { omit: { createdAt: true, updatedAt: true } },
+};
+
+const userOmit: Prisma.UserOmit = {
+  password: true,
+  createdAt: true,
+  updatedAt: true,
+};
 
 @Controller('users')
 export class UserController {
@@ -30,7 +41,8 @@ export class UserController {
   @Get()
   async findMany() {
     const [users, err] = await this.userService.findMany({
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -44,7 +56,8 @@ export class UserController {
 
     const [user, err] = await this.userService.findOne({
       where: { id: +userPayload.sub },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -55,7 +68,8 @@ export class UserController {
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [user, err] = await this.userService.findOne({
       where: { id },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -78,7 +92,8 @@ export class UserController {
     const [user, err] = await this.userService.update({
       where: { id },
       data: { username, firstName, lastName, password },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -97,7 +112,8 @@ export class UserController {
     const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
       data: { username, firstName, lastName, password },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -117,7 +133,8 @@ export class UserController {
     const [user, err] = await this.userService.update({
       where: { id },
       data: { archived: true },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -132,7 +149,8 @@ export class UserController {
     const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
       data: { archived: true },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -152,7 +170,8 @@ export class UserController {
     const [user, err] = await this.userService.update({
       where: { id },
       data: { archived: false },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -167,7 +186,8 @@ export class UserController {
     const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
       data: { archived: false },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -187,7 +207,8 @@ export class UserController {
     const [user, err] = await this.userService.update({
       where: { id },
       data: { verified: true },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
@@ -203,7 +224,8 @@ export class UserController {
 
     const [user, err] = await this.userService.delete({
       where: { id },
-      omit: { password: true },
+      include: userInclude,
+      omit: userOmit,
     });
 
     if (err) throw err;
