@@ -14,12 +14,10 @@ import {
   ParseIntPipe,
   ValidationPipe,
   UseGuards,
-  UnauthorizedException,
 } from '@nestjs/common';
 
 import { AuthGuard } from 'src/auth/auth.guard';
-import { RoleGuard } from 'src/role/role.guard';
-import { Roles } from 'src/role/role.decorator';
+import { Role } from 'generated/prisma/client';
 
 import { QueueService } from './queue.service';
 
@@ -30,18 +28,26 @@ import {
   FindMyQueryQueueDto,
 } from './dto/find-query-queue.dto';
 
-const queueIncludes: Prisma.QueueInclude = {
-  client: true,
-  service: true,
+const queueIncludes = (serviceId?: number): Prisma.QueueInclude => ({
+  client: { omit: { createdAt: true, updatedAt: true } },
+  service: { omit: { createdAt: true, updatedAt: true } },
   user: {
+    include: {
+      workerService: {
+        where: { serviceId },
+        select: { serviceId: true, price: true },
+      },
+    },
     omit: {
       username: true,
       password: true,
       role: true,
       archived: true,
+      createdAt: true,
+      updatedAt: true,
     },
   },
-};
+});
 
 @Controller('queue')
 export class QueueController {
@@ -54,8 +60,7 @@ export class QueueController {
     @Query(new ValidationPipe({ transform: true }))
     { clientId, serviceId, fromDate }: FindMyQueryQueueDto,
   ) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
 
     const [queues, err] = await this.queueService.findMany({
       where: {
@@ -64,7 +69,7 @@ export class QueueController {
         serviceId: serviceId,
         startAt: { gte: fromDate },
       },
-      include: queueIncludes,
+      include: queueIncludes(serviceId),
     });
     if (err) throw err;
     return queues;
@@ -74,7 +79,7 @@ export class QueueController {
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [queue, err] = await this.queueService.findOne({
       where: { id },
-      include: queueIncludes,
+      include: queueIncludes(),
     });
 
     if (err) throw err;
@@ -93,7 +98,7 @@ export class QueueController {
         serviceId: serviceId,
         startAt: { gte: fromDate },
       },
-      include: queueIncludes,
+      include: queueIncludes(serviceId),
     });
     if (err) throw err;
     return queues;
@@ -105,7 +110,7 @@ export class QueueController {
   ) {
     const [queue, err] = await this.queueService.create({
       data,
-      include: queueIncludes,
+      include: queueIncludes(),
     });
     if (err) throw err;
     return queue;
@@ -118,13 +123,14 @@ export class QueueController {
     @Body(new ValidationPipe({ transform: true })) data: UpdateQueueDto,
     @Req() request: Request,
   ) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
+    const userId =
+      userPayload.role !== Role.ADMIN ? +userPayload.sub : undefined;
 
     const [queue, err] = await this.queueService.update({
-      where: { id, userId: +userPayload.sub },
+      where: { id, userId },
       data,
-      include: queueIncludes,
+      include: queueIncludes(),
     });
     if (err) throw err;
     return queue;
@@ -133,40 +139,13 @@ export class QueueController {
   @UseGuards(AuthGuard)
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
+    const userId =
+      userPayload.role !== Role.ADMIN ? +userPayload.sub : undefined;
 
     const [queue, err] = await this.queueService.delete({
-      where: { id, userId: +userPayload.sub },
-      include: queueIncludes,
-    });
-    if (err) throw err;
-    return queue;
-  }
-
-  @UseGuards(AuthGuard, RoleGuard)
-  @Roles(['ADMIN'])
-  @Patch('worker/:queueId')
-  async updateSelected(
-    @Param('queueId', ParseIntPipe) queueId: number,
-    @Body(new ValidationPipe({ transform: true })) data: UpdateQueueDto,
-  ) {
-    const [queue, err] = await this.queueService.update({
-      where: { id: queueId },
-      data,
-      include: queueIncludes,
-    });
-    if (err) throw err;
-    return queue;
-  }
-
-  @UseGuards(AuthGuard, RoleGuard)
-  @Roles(['ADMIN'])
-  @Delete('worker/:queueId')
-  async deleteSelected(@Param('queueId', ParseIntPipe) queueId: number) {
-    const [queue, err] = await this.queueService.delete({
-      where: { id: queueId },
-      include: queueIncludes,
+      where: { id, userId },
+      include: queueIncludes(),
     });
     if (err) throw err;
     return queue;

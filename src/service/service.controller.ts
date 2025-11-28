@@ -45,8 +45,7 @@ export class ServiceController {
   @UseGuards(AuthGuard)
   @Get('worker/my')
   async findMyServices(@Req() request: Request) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
 
     const [service, err] = await this.serviceService.findWorkerServices({
       where: { userId: +userPayload.sub },
@@ -89,8 +88,7 @@ export class ServiceController {
     @Body(new ValidationPipe({ transform: true }))
     data: WorkerServiceDto[],
   ) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
 
     const [services, err] = await this.serviceService.workerServiceHandler({
       userId: +userPayload.sub,

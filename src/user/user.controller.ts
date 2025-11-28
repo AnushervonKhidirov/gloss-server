@@ -40,8 +40,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get('me')
   async findMe(@Req() request: Request) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
 
     const [user, err] = await this.userService.findOne({
       where: { id: +userPayload.sub },
@@ -71,8 +70,7 @@ export class UserController {
     @Body(new ValidationPipe()) data: UpdateUserDto,
     @Req() request: Request,
   ) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
     if (+userPayload.sub === id) throw new ForbiddenException();
 
     const { username, firstName, lastName, password } = data;
@@ -93,9 +91,7 @@ export class UserController {
     @Body(new ValidationPipe()) data: UpdateUserDto,
     @Req() request: Request,
   ) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
-
+    const userPayload: UserTokenPayload = request['user'];
     const { username, firstName, lastName, password } = data;
 
     const [user, err] = await this.userService.update({
@@ -115,8 +111,7 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Req() request: Request,
   ) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
     if (+userPayload.sub === id) throw new ForbiddenException();
 
     const [user, err] = await this.userService.update({
@@ -132,8 +127,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Patch('archive')
   async archive(@Req() request: Request) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
 
     const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
@@ -152,9 +146,7 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Req() request: Request,
   ) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
     if (+userPayload.sub === id) throw new ForbiddenException();
 
     const [user, err] = await this.userService.update({
@@ -170,8 +162,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Patch('unarchive')
   async unarchive(@Req() request: Request) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
 
     const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
@@ -190,9 +181,7 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Req() request: Request,
   ) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
     if (+userPayload.sub === id) throw new ForbiddenException();
 
     const [user, err] = await this.userService.update({
@@ -209,8 +198,7 @@ export class UserController {
   @Roles(['ADMIN'])
   @Delete('delete/:id')
   async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
-    const userPayload: UserTokenPayload | undefined = request['user'];
-    if (!userPayload) throw new UnauthorizedException();
+    const userPayload: UserTokenPayload = request['user'];
     if (+userPayload.sub === id) throw new ForbiddenException();
 
     const [user, err] = await this.userService.delete({

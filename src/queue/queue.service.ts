@@ -55,6 +55,7 @@ export class QueueService {
   } = {}): ReturnWithErrPromise<Queue[]> {
     try {
       const queue = await this.prisma.queue.findMany({
+        orderBy: { startAt: 'asc' },
         where,
         include,
         omit,
