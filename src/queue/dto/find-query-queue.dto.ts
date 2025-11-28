@@ -15,7 +15,12 @@ export class FindMyQueryQueueDto {
   @IsDate()
   @IsOptional()
   @Type(() => Date)
-  fromDate?: Date;
+  dateFrom?: Date;
+
+  @IsDate()
+  @IsOptional()
+  @Type(() => Date)
+  dateTo?: Date;
 }
 
 export class FindQueryQueueDto extends FindMyQueryQueueDto {

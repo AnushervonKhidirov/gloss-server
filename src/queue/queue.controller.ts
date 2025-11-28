@@ -58,7 +58,7 @@ export class QueueController {
   async findMyQueue(
     @Req() request: Request,
     @Query(new ValidationPipe({ transform: true }))
-    { clientId, serviceId, fromDate }: FindMyQueryQueueDto,
+    { clientId, serviceId, dateFrom, dateTo }: FindMyQueryQueueDto,
   ) {
     const userPayload: UserTokenPayload = request['user'];
 
@@ -67,7 +67,7 @@ export class QueueController {
         userId: +userPayload.sub,
         clientId: clientId,
         serviceId: serviceId,
-        startAt: { gte: fromDate },
+        startAt: { gte: dateFrom, lt: dateTo },
       },
       include: queueIncludes(serviceId),
     });
@@ -89,14 +89,21 @@ export class QueueController {
   @Get()
   async findMany(
     @Query(new ValidationPipe({ transform: true }))
-    { userId, exceptUserId, clientId, serviceId, fromDate }: FindQueryQueueDto,
+    {
+      userId,
+      exceptUserId,
+      clientId,
+      serviceId,
+      dateFrom,
+      dateTo,
+    }: FindQueryQueueDto,
   ) {
     const [queues, err] = await this.queueService.findMany({
       where: {
         userId: { equals: userId, not: exceptUserId },
         clientId: clientId,
         serviceId: serviceId,
-        startAt: { gte: fromDate },
+        startAt: { gte: dateFrom, lt: dateTo },
       },
       include: queueIncludes(serviceId),
     });
@@ -140,11 +147,13 @@ export class QueueController {
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
     const userPayload: UserTokenPayload = request['user'];
-    const userId =
-      userPayload.role !== Role.ADMIN ? +userPayload.sub : undefined;
+
+    const isAdmin = userPayload.role === Role.ADMIN;
+    const userId = isAdmin ? undefined : +userPayload.sub;
+    const now = isAdmin ? undefined : new Date();
 
     const [queue, err] = await this.queueService.delete({
-      where: { id, userId },
+      where: { id, userId, endAt: { gt: now } },
       include: queueIncludes(),
     });
     if (err) throw err;
