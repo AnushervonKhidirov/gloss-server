@@ -22,7 +22,7 @@ export class TokenService {
     try {
       const accessToken = this.jwtService.sign(payload, {
         secret: process.env.ACCESS_TOKEN_SECRET,
-        expiresIn: '10m',
+        expiresIn: '1d',
       });
       const refreshToken = this.jwtService.sign(payload, {
         secret: process.env.REFRESH_TOKEN_SECRET,

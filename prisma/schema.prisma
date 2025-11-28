@@ -19,7 +19,7 @@ model User {
   password      String
   firstName     String          @map("first_name") @db.VarChar(40)
   lastName      String?         @map("last_name") @db.VarChar(40)
-  phone         String          @db.VarChar(20)
+  phone         String          @unique @db.VarChar(20)
   verified      Boolean         @default(false)
   archived      Boolean         @default(false)
   createdAt     DateTime        @default(now()) @map("created_at") @db.Timestamp(0)
@@ -99,6 +99,7 @@ model WorkerService {
 model Specialty {
   id        Int      @id @default(autoincrement())
   value     String   @unique @db.VarChar(60)
+  desc      String?  @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
   users     User[]

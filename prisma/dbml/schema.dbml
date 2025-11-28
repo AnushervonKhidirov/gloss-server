@@ -8,7 +8,7 @@ Table user {
   password String [not null]
   firstName String [not null]
   lastName String
-  phone String [not null]
+  phone String [unique, not null]
   verified Boolean [not null, default: false]
   archived Boolean [not null, default: false]
   createdAt DateTime [default: `now()`, not null]
@@ -76,6 +76,7 @@ Table worker_service {
 Table specialty {
   id Int [pk, increment]
   value String [unique, not null]
+  desc String
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   users user [not null]

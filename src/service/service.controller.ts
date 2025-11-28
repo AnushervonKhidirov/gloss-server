@@ -14,8 +14,6 @@ import {
   ValidationPipe,
   UseGuards,
   Req,
-  UnauthorizedException,
-  ForbiddenException,
 } from '@nestjs/common';
 
 import { AuthGuard } from 'src/auth/auth.guard';

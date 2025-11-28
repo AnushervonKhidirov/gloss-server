@@ -10,7 +10,6 @@ import {
   Patch,
   Delete,
   Req,
-  UnauthorizedException,
   ForbiddenException,
   UseGuards,
   ValidationPipe,
@@ -217,7 +216,7 @@ export class UserController {
 
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(['ADMIN'])
-  @Delete('delete/:id')
+  @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
     const userPayload: UserTokenPayload = request['user'];
     if (+userPayload.sub === id) throw new ForbiddenException();
