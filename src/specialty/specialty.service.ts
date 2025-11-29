@@ -28,7 +28,7 @@ export class SpecialtyService {
         include,
         omit,
       });
-      if (!specialty) throw new NotFoundException('Specialty not found');
+      if (!specialty) throw new NotFoundException('Специальность не найдена');
       return [specialty, null];
     } catch (err) {
       return exceptionHandler(err);

@@ -26,7 +26,7 @@ export class WorkerService {
         omit,
       });
 
-      if (!user) throw new NotFoundException('User not found');
+      if (!user) throw new NotFoundException('Работник не найден');
       return [user, null];
     } catch (err) {
       return exceptionHandler(err);

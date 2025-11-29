@@ -21,7 +21,7 @@ import { Roles } from 'src/role/role.decorator';
 
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Prisma } from 'generated/prisma/client';
+import { Prisma, Role } from 'generated/prisma/client';
 
 const userInclude: Prisma.UserInclude = {
   specialty: { omit: { createdAt: true, updatedAt: true } },
@@ -81,11 +81,7 @@ export class UserController {
   async updateSelected(
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe()) data: UpdateUserDto,
-    @Req() request: Request,
   ) {
-    const userPayload: UserTokenPayload = request['user'];
-    if (+userPayload.sub === id) throw new ForbiddenException();
-
     const { username, firstName, lastName, password } = data;
 
     const [user, err] = await this.userService.update({
@@ -122,12 +118,14 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(['ADMIN'])
   @Patch('archive/:id')
-  async archiveSelected(
+  async archiveUser(
     @Param('id', ParseIntPipe) id: number,
     @Req() request: Request,
   ) {
     const userPayload: UserTokenPayload = request['user'];
-    if (+userPayload.sub === id) throw new ForbiddenException();
+    if (+userPayload.sub === id) {
+      throw new ForbiddenException('Нельзя уволить себя если вы Администрарот');
+    }
 
     const [user, err] = await this.userService.update({
       where: { id },
@@ -140,7 +138,8 @@ export class UserController {
     return user;
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(['WORKER'])
   @Patch('archive')
   async archive(@Req() request: Request) {
     const userPayload: UserTokenPayload = request['user'];
@@ -159,31 +158,9 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(['ADMIN'])
   @Patch('unarchive/:id')
-  async unarchiveSelected(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() request: Request,
-  ) {
-    const userPayload: UserTokenPayload = request['user'];
-    if (+userPayload.sub === id) throw new ForbiddenException();
-
+  async unarchiveUser(@Param('id', ParseIntPipe) id: number) {
     const [user, err] = await this.userService.update({
       where: { id },
-      data: { archived: false },
-      include: userInclude,
-      omit: userOmit,
-    });
-
-    if (err) throw err;
-    return user;
-  }
-
-  @UseGuards(AuthGuard)
-  @Patch('unarchive')
-  async unarchive(@Req() request: Request) {
-    const userPayload: UserTokenPayload = request['user'];
-
-    const [user, err] = await this.userService.update({
-      where: { id: +userPayload.sub },
       data: { archived: false },
       include: userInclude,
       omit: userOmit,
@@ -196,13 +173,7 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(['ADMIN'])
   @Patch('approve/:id')
-  async verifyUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Req() request: Request,
-  ) {
-    const userPayload: UserTokenPayload = request['user'];
-    if (+userPayload.sub === id) throw new ForbiddenException();
-
+  async approveUser(@Param('id', ParseIntPipe) id: number) {
     const [user, err] = await this.userService.update({
       where: { id },
       data: { verified: true },
@@ -219,7 +190,11 @@ export class UserController {
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number, @Req() request: Request) {
     const userPayload: UserTokenPayload = request['user'];
-    if (+userPayload.sub === id) throw new ForbiddenException();
+    if (+userPayload.sub === id) {
+      throw new ForbiddenException(
+        'Нельзя удалить свой аккаунт если вы Администрарот',
+      );
+    }
 
     const [user, err] = await this.userService.delete({
       where: { id },

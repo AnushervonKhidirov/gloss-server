@@ -32,7 +32,7 @@ export class ClientService {
         include,
         omit,
       });
-      if (!client) throw new NotFoundException('Client not found');
+      if (!client) throw new NotFoundException('Клиент не найден');
       return [client, null];
     } catch (err) {
       return exceptionHandler(err);
@@ -73,7 +73,7 @@ export class ClientService {
       const client = await this.prisma.client.create({ data, include, omit });
 
       if (!client) {
-        throw new InternalServerErrorException("Can't add client");
+        throw new InternalServerErrorException('Не удается добавить клиента');
       }
 
       return [client, null];
@@ -102,7 +102,7 @@ export class ClientService {
       });
 
       if (!client) {
-        throw new InternalServerErrorException("Can't update client");
+        throw new InternalServerErrorException('Не удается обновить клиент');
       }
 
       return [client, null];
@@ -124,7 +124,7 @@ export class ClientService {
       const client = await this.prisma.client.delete({ where, include, omit });
 
       if (!client) {
-        throw new InternalServerErrorException("Can't delete client");
+        throw new InternalServerErrorException('Не удается удалить клиента');
       }
 
       return [client, null];

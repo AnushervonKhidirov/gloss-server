@@ -14,6 +14,7 @@ import {
   ParseIntPipe,
   ValidationPipe,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -131,16 +132,27 @@ export class QueueController {
     @Req() request: Request,
   ) {
     const userPayload: UserTokenPayload = request['user'];
-    const userId =
-      userPayload.role !== Role.ADMIN ? +userPayload.sub : undefined;
+    const isAdmin = userPayload.role === Role.ADMIN;
+    const userId = +userPayload.sub;
 
-    const [queue, err] = await this.queueService.update({
-      where: { id, userId },
+    const [queue, err] = await this.queueService.findOne({
+      where: { id },
+    });
+
+    if (err) throw err;
+    if (queue.userId !== userId && !isAdmin) {
+      throw new ForbiddenException(
+        'Только администратору разрешено редактировать чужую очередь',
+      );
+    }
+
+    const [queueToUpdate, queueToUpdateErr] = await this.queueService.update({
+      where: { id },
       data,
       include: queueIncludes(),
     });
-    if (err) throw err;
-    return queue;
+    if (queueToUpdateErr) throw queueToUpdateErr;
+    return queueToUpdate;
   }
 
   @UseGuards(AuthGuard)
@@ -149,14 +161,32 @@ export class QueueController {
     const userPayload: UserTokenPayload = request['user'];
 
     const isAdmin = userPayload.role === Role.ADMIN;
-    const userId = isAdmin ? undefined : +userPayload.sub;
-    const now = isAdmin ? undefined : new Date();
+    const userId = +userPayload.sub;
+    const now = new Date();
 
-    const [queue, err] = await this.queueService.delete({
-      where: { id, userId, endAt: { gt: now } },
+    const [queue, err] = await this.queueService.findOne({
+      where: { id },
+    });
+
+    if (err) throw err;
+
+    if (queue.userId !== userId && !isAdmin) {
+      throw new ForbiddenException(
+        'Только администратору разрешено удалять чужую очередь',
+      );
+    }
+
+    if (now >= queue.endAt && !isAdmin) {
+      throw new ForbiddenException(
+        'Только администратору разрешено удалять оконченные предоставленные услуги',
+      );
+    }
+
+    const [queueToDelete, queueToDeleteErr] = await this.queueService.delete({
+      where: { id },
       include: queueIncludes(),
     });
-    if (err) throw err;
-    return queue;
+    if (queueToDeleteErr) throw queueToDeleteErr;
+    return queueToDelete;
   }
 }

@@ -1,11 +1,7 @@
 import type { Prisma, Service, WorkerService } from 'generated/prisma/client';
 import type { ReturnWithErrPromise } from 'src/common/type/return-with-err.type';
 
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -33,7 +29,7 @@ export class ServiceService {
         include,
         omit,
       });
-      if (!service) throw new NotFoundException('Service not found');
+      if (!service) throw new NotFoundException('Услуга не найдена');
       return [service, null];
     } catch (err) {
       return exceptionHandler(err);

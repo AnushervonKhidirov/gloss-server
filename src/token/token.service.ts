@@ -22,11 +22,11 @@ export class TokenService {
     try {
       const accessToken = this.jwtService.sign(payload, {
         secret: process.env.ACCESS_TOKEN_SECRET,
-        expiresIn: '1d',
+        expiresIn: '30m',
       });
       const refreshToken = this.jwtService.sign(payload, {
         secret: process.env.REFRESH_TOKEN_SECRET,
-        expiresIn: '1d',
+        expiresIn: '3d',
       });
 
       return [{ accessToken, refreshToken }, null];
@@ -119,12 +119,12 @@ export class TokenService {
 
   private tokenErrorsToHttpException(err: any) {
     const errMessages = {
-      'invalid signature': 'Invalid signature',
-      'invalid token': 'Invalid token',
-      'jwt expired': 'Token expired',
+      'invalid signature': 'Невалидная подпись',
+      'invalid token': 'Невалидный токен',
+      'jwt expired': 'Срок действия токена истек',
     };
 
-    const message = <string>errMessages[err.message] ?? 'Invalid token';
+    const message = <string>errMessages[err.message] ?? 'Невалидный токен';
     return new UnauthorizedException(message);
   }
 }

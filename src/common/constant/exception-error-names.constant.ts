@@ -1,6 +1,6 @@
 export const exceptionErrorNames = {
   'Bad Request': 'Неверный Запрос',
-  Unauthorized: 'Несанкционированно',
+  Unauthorized: 'Неавторизованный',
   'Not Found': 'Не Найдено',
   Forbidden: 'Запрещено',
   'Not Acceptable': 'Неприемлемо',

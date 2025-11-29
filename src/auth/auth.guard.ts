@@ -23,7 +23,7 @@ export class AuthGuard implements CanActivate {
     if (err) throw err;
 
     if (!userPayload.verified) {
-      throw new ForbiddenException('User is not verified');
+      throw new ForbiddenException('Пользователь не подтвержден');
     }
 
     request['user'] = userPayload;

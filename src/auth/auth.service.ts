@@ -44,7 +44,7 @@ export class AuthService {
 
       if (err) {
         if (err.getStatus() === 409) {
-          throw new ConflictException('User already exists');
+          throw new ConflictException('Пользователь уже существует');
         }
 
         throw err;
@@ -68,7 +68,7 @@ export class AuthService {
       if (err) throw err;
 
       const isPasswordCorrect = await compare(password, user.password);
-      if (!isPasswordCorrect) throw new BadRequestException('Wrong password');
+      if (!isPasswordCorrect) throw new BadRequestException('Неверный пароль');
 
       if (verificationCheck && !user.verified) throw new ForbiddenException();
 

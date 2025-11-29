@@ -29,7 +29,7 @@ export class UserService {
         omit,
       });
 
-      if (!user) throw new NotFoundException('User not found');
+      if (!user) throw new NotFoundException('Пользователь не найден');
       return [user, null];
     } catch (err) {
       return exceptionHandler(err);

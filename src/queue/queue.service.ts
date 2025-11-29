@@ -37,7 +37,7 @@ export class QueueService {
         include,
         omit,
       });
-      if (!queue) throw new NotFoundException('Queue not found');
+      if (!queue) throw new NotFoundException('Очередь не найдена');
       return [queue, null];
     } catch (err) {
       return exceptionHandler(err);
@@ -86,7 +86,7 @@ export class QueueService {
       });
 
       if (!queue) {
-        throw new InternalServerErrorException("Can't add to queue");
+        throw new InternalServerErrorException('Не удается добавить в очередь');
       }
 
       return [queue, null];
@@ -126,7 +126,7 @@ export class QueueService {
       });
 
       if (!queue) {
-        throw new InternalServerErrorException("Can't update queue");
+        throw new InternalServerErrorException('Не удается обновить очередь');
       }
 
       return [queue, null];
@@ -148,7 +148,7 @@ export class QueueService {
       const queue = await this.prisma.queue.delete({ where, include, omit });
 
       if (!queue) {
-        throw new InternalServerErrorException("Can't delete queue");
+        throw new InternalServerErrorException('Не удается удалить очередь');
       }
 
       return [queue, null];
@@ -185,9 +185,7 @@ export class QueueService {
       if (bookedErr) throw bookedErr;
 
       if (bookedList.length > 0) {
-        throw new ConflictException(
-          'There is already an appointment for this time',
-        );
+        throw new ConflictException('На это время уже назначена встреча');
       }
 
       return [{ ...data, endAt }, null];

@@ -28,7 +28,7 @@ export class CategoryService {
         include,
         omit,
       });
-      if (!category) throw new NotFoundException('Category not found');
+      if (!category) throw new NotFoundException('Категория не найдена');
       return [category, null];
     } catch (err) {
       return exceptionHandler(err);
