@@ -12,6 +12,8 @@ import type {
   HttpExceptionBodyMessage,
 } from '@nestjs/common';
 
+import { exceptionErrorNames } from '../constant/exception-error-names.constant';
+
 type CustomHttpExceptionBody = {
   error: string;
   message?: HttpExceptionBodyMessage;
@@ -58,6 +60,10 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
 
     if (!responseBody.message) {
       delete responseBody.message;
+    }
+
+    if (responseBody.error in exceptionErrorNames) {
+      responseBody.error = exceptionErrorNames[responseBody.error];
     }
 
     return responseBody;
