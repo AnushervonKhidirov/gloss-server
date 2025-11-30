@@ -12,7 +12,7 @@ import type {
   HttpExceptionBodyMessage,
 } from '@nestjs/common';
 
-import { exceptionErrorNames } from '../constant/exception-error-names.constant';
+import { exceptionErrorNames } from '../utils/constant/exception-error-names.constant';
 
 type CustomHttpExceptionBody = {
   error: string;

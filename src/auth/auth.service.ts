@@ -1,5 +1,5 @@
 import type { User } from 'generated/prisma/client';
-import type { ReturnWithErrPromise } from 'src/common/type/return-with-err.type';
+import type { ReturnWithErrPromise } from 'src/type/return-with-err.type';
 import type { Tokens, UserTokenPayload } from 'src/token/type/token.type';
 
 import {
@@ -19,7 +19,7 @@ import { SignInDto } from './dto/sign-in.dto';
 import { SignOutDto } from './dto/sign-out.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 
-import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
+import { exceptionHandler } from 'src/utils/helper/exception-handler.helper';
 
 @Injectable()
 export class AuthService {

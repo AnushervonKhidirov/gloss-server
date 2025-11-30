@@ -1,5 +1,5 @@
 import type { Prisma, Client } from 'generated/prisma/client';
-import type { ReturnWithErrPromise } from 'src/common/type/return-with-err.type';
+import type { ReturnWithErrPromise } from 'src/type/return-with-err.type';
 
 import {
   Injectable,
@@ -11,7 +11,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 
-import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
+import { exceptionHandler } from 'src/utils/helper/exception-handler.helper';
 
 @Injectable()
 export class ClientService {

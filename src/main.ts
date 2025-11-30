@@ -1,6 +1,7 @@
+import './utils/config/dayjs.config';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/exception-filter/exception.filter';
+import { HttpExceptionFilter } from './filter/exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });

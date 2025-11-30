@@ -123,6 +123,19 @@ model Token {
   @@map("tokens")
 }
 
+model Statistic {
+  id            Int      @id @default(autoincrement())
+  worker        String
+  workerId      Int      @map("worker_id")
+  service       String
+  appointmentAt DateTime @map("appointment_at")
+  clientName    String   @map("client_name")
+  clientPhone   String   @map("client_phone")
+  price         Int
+
+  @@map("statistic")
+}
+
 enum Role {
   WORKER
   ADMIN

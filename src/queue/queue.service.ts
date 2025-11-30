@@ -1,5 +1,5 @@
 import type { Prisma, Queue } from 'generated/prisma/client';
-import type { ReturnWithErrPromise } from 'src/common/type/return-with-err.type';
+import type { ReturnWithErrPromise } from 'src/type/return-with-err.type';
 
 import {
   ConflictException,
@@ -13,7 +13,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateQueueDto } from './dto/create-queue.dto';
 import { UpdateQueueDto } from './dto/update-queue.dto';
 
-import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
+import { exceptionHandler } from 'src/utils/helper/exception-handler.helper';
 
 @Injectable()
 export class QueueService {

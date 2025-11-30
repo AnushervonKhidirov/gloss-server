@@ -1,5 +1,5 @@
 import type { Prisma, Category } from 'generated/prisma/client';
-import type { ReturnWithErrPromise } from 'src/common/type/return-with-err.type';
+import type { ReturnWithErrPromise } from 'src/type/return-with-err.type';
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
-import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
+import { exceptionHandler } from 'src/utils/helper/exception-handler.helper';
 
 @Injectable()
 export class CategoryService {

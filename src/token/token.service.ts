@@ -3,13 +3,17 @@ import type { Tokens, UserTokenPayload } from './type/token.type';
 import type {
   ReturnWithErr,
   ReturnWithErrPromise,
-} from 'src/common/type/return-with-err.type';
+} from 'src/type/return-with-err.type';
 
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
+import dayjs from 'dayjs';
+import { exceptionHandler } from 'src/utils/helper/exception-handler.helper';
+
+const accessExpiresIn = dayjs.duration(30, 'm');
+const refreshExpiresIn = dayjs.duration(3, 'd');
 
 @Injectable()
 export class TokenService {
@@ -22,11 +26,11 @@ export class TokenService {
     try {
       const accessToken = this.jwtService.sign(payload, {
         secret: process.env.ACCESS_TOKEN_SECRET,
-        expiresIn: '30m',
+        expiresIn: accessExpiresIn.asSeconds(),
       });
       const refreshToken = this.jwtService.sign(payload, {
         secret: process.env.REFRESH_TOKEN_SECRET,
-        expiresIn: '3d',
+        expiresIn: refreshExpiresIn.asSeconds(),
       });
 
       return [{ accessToken, refreshToken }, null];
@@ -40,9 +44,7 @@ export class TokenService {
     refreshToken: string,
   ): ReturnWithErrPromise<UserToken> {
     try {
-      const expiredAt = new Date();
-      expiredAt.setHours(expiredAt.getHours() + 10);
-
+      const expiredAt = dayjs().add(refreshExpiresIn).toDate();
       const token = await this.prisma.token.create({
         data: { refreshToken, userId, expiredAt },
       });

@@ -1,5 +1,5 @@
 import type { Prisma, Service, WorkerService } from 'generated/prisma/client';
-import type { ReturnWithErrPromise } from 'src/common/type/return-with-err.type';
+import type { ReturnWithErrPromise } from 'src/type/return-with-err.type';
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -8,7 +8,7 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { WorkerServiceDto } from './dto/worker-service-price.dto';
 
-import { exceptionHandler } from 'src/common/helper/exception-handler.helper';
+import { exceptionHandler } from 'src/utils/helper/exception-handler.helper';
 
 @Injectable()
 export class ServiceService {
