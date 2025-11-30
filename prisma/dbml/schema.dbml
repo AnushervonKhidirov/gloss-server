@@ -16,7 +16,7 @@ Table user {
   role Role [not null, default: 'WORKER']
   specialtyId Int
   specialty specialty
-  queue queue [not null]
+  appointment appointment [not null]
   workerService worker_service [not null]
   tokens tokens [not null]
 }
@@ -27,7 +27,7 @@ Table client {
   name String [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  queue queue [not null]
+  appointment appointment [not null]
 }
 
 Table services {
@@ -40,7 +40,7 @@ Table services {
   updatedAt DateTime [not null]
   category categories [not null]
   categoryId Int [not null]
-  queue queue [not null]
+  appointment appointment [not null]
   workerService worker_service [not null]
 }
 
@@ -52,7 +52,7 @@ Table categories {
   services services [not null]
 }
 
-Table queue {
+Table appointment {
   id Int [pk, increment]
   startAt DateTime [not null]
   endAt DateTime [not null]
@@ -94,6 +94,17 @@ Table tokens {
   user user [not null]
 }
 
+Table statistic {
+  id Int [pk, increment]
+  worker String [not null]
+  workerId Int [not null]
+  service String [not null]
+  appointmentAt DateTime [not null]
+  clientName String [not null]
+  clientPhone String [not null]
+  price Int [not null]
+}
+
 Enum Role {
   WORKER
   ADMIN
@@ -103,11 +114,11 @@ Ref: user.specialtyId > specialty.id
 
 Ref: services.categoryId > categories.id
 
-Ref: queue.userId > user.id
+Ref: appointment.userId > user.id
 
-Ref: queue.clientId > client.id
+Ref: appointment.clientId > client.id
 
-Ref: queue.serviceId > services.id
+Ref: appointment.serviceId > services.id
 
 Ref: worker_service.userId > user.id [delete: Cascade]
 

@@ -9,7 +9,7 @@ import { SpecialtyModule } from './specialty/specialty.module';
 import { PrismaService } from './prisma/prisma.service';
 import { ServiceModule } from './service/service.module';
 import { WorkerModule } from './worker/worker.module';
-import { QueueModule } from './queue/queue.module';
+import { AppointmentModule } from './appointment/appointment.module';
 import { ClientModule } from './client/client.module';
 
 @Module({
@@ -23,7 +23,7 @@ import { ClientModule } from './client/client.module';
     SpecialtyModule,
     ServiceModule,
     WorkerModule,
-    QueueModule,
+    AppointmentModule,
     ClientModule,
   ],
   controllers: [],

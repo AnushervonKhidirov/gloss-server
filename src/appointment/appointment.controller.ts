@@ -20,16 +20,18 @@ import {
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Role } from 'generated/prisma/client';
 
-import { QueueService } from './queue.service';
+import { AppointmentService } from './appointment.service';
 
-import { CreateQueueDto } from './dto/create-queue.dto';
-import { UpdateQueueDto } from './dto/update-queue.dto';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import {
-  FindQueryQueueDto,
-  FindMyQueryQueueDto,
-} from './dto/find-query-queue.dto';
+  FindQueryAppointmentDto,
+  FindMyQueryAppointmentDto,
+} from './dto/find-query-appointment.dto';
 
-const queueIncludes = (serviceId?: number): Prisma.QueueInclude => ({
+const appointmentIncludes = (
+  serviceId?: number,
+): Prisma.AppointmentInclude => ({
   client: { omit: { createdAt: true, updatedAt: true } },
   service: { omit: { createdAt: true, updatedAt: true } },
   user: {
@@ -50,41 +52,41 @@ const queueIncludes = (serviceId?: number): Prisma.QueueInclude => ({
   },
 });
 
-@Controller('queue')
-export class QueueController {
-  constructor(private readonly queueService: QueueService) {}
+@Controller('appointment')
+export class AppointmentController {
+  constructor(private readonly appointmentService: AppointmentService) {}
 
   @UseGuards(AuthGuard)
   @Get('my')
-  async findMyQueue(
+  async findMyAppointment(
     @Req() request: Request,
     @Query(new ValidationPipe({ transform: true }))
-    { clientId, serviceId, dateFrom, dateTo }: FindMyQueryQueueDto,
+    { clientId, serviceId, dateFrom, dateTo }: FindMyQueryAppointmentDto,
   ) {
     const userPayload: UserTokenPayload = request['user'];
 
-    const [queues, err] = await this.queueService.findMany({
+    const [appointments, err] = await this.appointmentService.findMany({
       where: {
         userId: +userPayload.sub,
         clientId: clientId,
         serviceId: serviceId,
         startAt: { gte: dateFrom, lt: dateTo },
       },
-      include: queueIncludes(serviceId),
+      include: appointmentIncludes(serviceId),
     });
     if (err) throw err;
-    return queues;
+    return appointments;
   }
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    const [queue, err] = await this.queueService.findOne({
+    const [appointment, err] = await this.appointmentService.findOne({
       where: { id },
-      include: queueIncludes(),
+      include: appointmentIncludes(),
     });
 
     if (err) throw err;
-    return queue;
+    return appointment;
   }
 
   @Get()
@@ -97,62 +99,63 @@ export class QueueController {
       serviceId,
       dateFrom,
       dateTo,
-    }: FindQueryQueueDto,
+    }: FindQueryAppointmentDto,
   ) {
-    const [queues, err] = await this.queueService.findMany({
+    const [appointments, err] = await this.appointmentService.findMany({
       where: {
         userId: { equals: userId, not: exceptUserId },
         clientId: clientId,
         serviceId: serviceId,
         startAt: { gte: dateFrom, lt: dateTo },
       },
-      include: queueIncludes(serviceId),
+      include: appointmentIncludes(serviceId),
     });
     if (err) throw err;
-    return queues;
+    return appointments;
   }
 
   @Post()
   async create(
-    @Body(new ValidationPipe({ transform: true })) data: CreateQueueDto,
+    @Body(new ValidationPipe({ transform: true })) data: CreateAppointmentDto,
   ) {
-    const [queue, err] = await this.queueService.create({
+    const [appointment, err] = await this.appointmentService.create({
       data,
-      include: queueIncludes(),
+      include: appointmentIncludes(),
     });
     if (err) throw err;
-    return queue;
+    return appointment;
   }
 
   @UseGuards(AuthGuard)
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ValidationPipe({ transform: true })) data: UpdateQueueDto,
+    @Body(new ValidationPipe({ transform: true })) data: UpdateAppointmentDto,
     @Req() request: Request,
   ) {
     const userPayload: UserTokenPayload = request['user'];
     const isAdmin = userPayload.role === Role.ADMIN;
     const userId = +userPayload.sub;
 
-    const [queue, err] = await this.queueService.findOne({
+    const [appointment, err] = await this.appointmentService.findOne({
       where: { id },
     });
 
     if (err) throw err;
-    if (queue.userId !== userId && !isAdmin) {
+    if (appointment.userId !== userId && !isAdmin) {
       throw new ForbiddenException(
         'Только администратору разрешено редактировать чужую очередь',
       );
     }
 
-    const [queueToUpdate, queueToUpdateErr] = await this.queueService.update({
-      where: { id },
-      data,
-      include: queueIncludes(),
-    });
-    if (queueToUpdateErr) throw queueToUpdateErr;
-    return queueToUpdate;
+    const [appointmentToUpdate, appointmentToUpdateErr] =
+      await this.appointmentService.update({
+        where: { id },
+        data,
+        include: appointmentIncludes(),
+      });
+    if (appointmentToUpdateErr) throw appointmentToUpdateErr;
+    return appointmentToUpdate;
   }
 
   @UseGuards(AuthGuard)
@@ -164,29 +167,30 @@ export class QueueController {
     const userId = +userPayload.sub;
     const now = new Date();
 
-    const [queue, err] = await this.queueService.findOne({
+    const [appointment, err] = await this.appointmentService.findOne({
       where: { id },
     });
 
     if (err) throw err;
 
-    if (queue.userId !== userId && !isAdmin) {
+    if (appointment.userId !== userId && !isAdmin) {
       throw new ForbiddenException(
         'Только администратору разрешено удалять чужую очередь',
       );
     }
 
-    if (now >= queue.endAt && !isAdmin) {
+    if (now >= appointment.endAt && !isAdmin) {
       throw new ForbiddenException(
         'Только администратору разрешено удалять оконченные предоставленные услуги',
       );
     }
 
-    const [queueToDelete, queueToDeleteErr] = await this.queueService.delete({
-      where: { id },
-      include: queueIncludes(),
-    });
-    if (queueToDeleteErr) throw queueToDeleteErr;
-    return queueToDelete;
+    const [appointmentToDelete, appointmentToDeleteErr] =
+      await this.appointmentService.delete({
+        where: { id },
+        include: appointmentIncludes(),
+      });
+    if (appointmentToDeleteErr) throw appointmentToDeleteErr;
+    return appointmentToDelete;
   }
 }

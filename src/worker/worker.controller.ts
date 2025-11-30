@@ -31,7 +31,7 @@ export class WorkerController {
       where: { id },
       omit: fieldsToOmit,
       include: {
-        queue: true,
+        appointment: true,
       },
     });
 
@@ -55,7 +55,7 @@ export class WorkerController {
           where: { serviceId: query.serviceId },
           include: { service: { omit: { createdAt: true, updatedAt: true } } },
         },
-        queue: {
+        appointment: {
           where: {
             startAt: { gte: query.dateFrom },
             endAt: { lte: query.dateTo },

@@ -1,4 +1,4 @@
-import type { Prisma, Queue } from 'generated/prisma/client';
+import type { Prisma, Appointment } from 'generated/prisma/client';
 import type { ReturnWithErrPromise } from 'src/type/return-with-err.type';
 
 import {
@@ -10,13 +10,13 @@ import {
 import { ServiceService } from 'src/service/service.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-import { CreateQueueDto } from './dto/create-queue.dto';
-import { UpdateQueueDto } from './dto/update-queue.dto';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 
 import { exceptionHandler } from 'src/utils/helper/exception-handler.helper';
 
 @Injectable()
-export class QueueService {
+export class AppointmentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly serviceService: ServiceService,
@@ -27,18 +27,18 @@ export class QueueService {
     include,
     omit,
   }: {
-    where: Prisma.QueueWhereUniqueInput;
-    include?: Prisma.QueueInclude;
-    omit?: Prisma.QueueOmit;
-  }): ReturnWithErrPromise<Queue> {
+    where: Prisma.AppointmentWhereUniqueInput;
+    include?: Prisma.AppointmentInclude;
+    omit?: Prisma.AppointmentOmit;
+  }): ReturnWithErrPromise<Appointment> {
     try {
-      const queue = await this.prisma.queue.findUnique({
+      const appointment = await this.prisma.appointment.findUnique({
         where,
         include,
         omit,
       });
-      if (!queue) throw new NotFoundException('Очередь не найдена');
-      return [queue, null];
+      if (!appointment) throw new NotFoundException('Очередь не найдена');
+      return [appointment, null];
     } catch (err) {
       return exceptionHandler(err);
     }
@@ -49,18 +49,18 @@ export class QueueService {
     include,
     omit,
   }: {
-    where?: Prisma.QueueWhereInput;
-    include?: Prisma.QueueInclude;
-    omit?: Prisma.QueueOmit;
-  } = {}): ReturnWithErrPromise<Queue[]> {
+    where?: Prisma.AppointmentWhereInput;
+    include?: Prisma.AppointmentInclude;
+    omit?: Prisma.AppointmentOmit;
+  } = {}): ReturnWithErrPromise<Appointment[]> {
     try {
-      const queue = await this.prisma.queue.findMany({
+      const appointment = await this.prisma.appointment.findMany({
         orderBy: { startAt: 'asc' },
         where,
         include,
         omit,
       });
-      return [queue, null];
+      return [appointment, null];
     } catch (err) {
       return exceptionHandler(err);
     }
@@ -71,25 +71,25 @@ export class QueueService {
     include,
     omit,
   }: {
-    data: CreateQueueDto;
-    include?: Prisma.QueueInclude;
-    omit?: Prisma.QueueOmit;
-  }): ReturnWithErrPromise<Queue> {
+    data: CreateAppointmentDto;
+    include?: Prisma.AppointmentInclude;
+    omit?: Prisma.AppointmentOmit;
+  }): ReturnWithErrPromise<Appointment> {
     try {
       const [checkedData, err] = await this.isPossibleToBook(data);
       if (err) throw err;
 
-      const queue = await this.prisma.queue.create({
+      const appointment = await this.prisma.appointment.create({
         data: checkedData,
         include,
         omit,
       });
 
-      if (!queue) {
+      if (!appointment) {
         throw new InternalServerErrorException('Не удается добавить в очередь');
       }
 
-      return [queue, null];
+      return [appointment, null];
     } catch (err) {
       return exceptionHandler(err);
     }
@@ -101,35 +101,37 @@ export class QueueService {
     include,
     omit,
   }: {
-    where: Prisma.QueueWhereUniqueInput;
-    data: UpdateQueueDto;
-    include?: Prisma.QueueInclude;
-    omit?: Prisma.QueueOmit;
-  }): ReturnWithErrPromise<Queue> {
+    where: Prisma.AppointmentWhereUniqueInput;
+    data: UpdateAppointmentDto;
+    include?: Prisma.AppointmentInclude;
+    omit?: Prisma.AppointmentOmit;
+  }): ReturnWithErrPromise<Appointment> {
     try {
-      const [queueToUpdate, updateErr] = await this.findOne({
+      const [appointmentToUpdate, updateErr] = await this.findOne({
         where,
         omit: { id: true },
       });
 
       if (updateErr) throw updateErr;
 
-      const updatedQueue = { ...queueToUpdate, ...data };
-      const [checkedData, err] = await this.isPossibleToBook(updatedQueue);
+      const updatedAppointment = { ...appointmentToUpdate, ...data };
+      const [checkedData, err] =
+        await this.isPossibleToBook(updatedAppointment);
+
       if (err) throw err;
 
-      const queue = await this.prisma.queue.update({
+      const appointment = await this.prisma.appointment.update({
         where,
         data: checkedData,
         include,
         omit,
       });
 
-      if (!queue) {
+      if (!appointment) {
         throw new InternalServerErrorException('Не удается обновить очередь');
       }
 
-      return [queue, null];
+      return [appointment, null];
     } catch (err) {
       return exceptionHandler(err);
     }
@@ -140,26 +142,30 @@ export class QueueService {
     include,
     omit,
   }: {
-    where: Prisma.QueueWhereUniqueInput;
-    include?: Prisma.QueueInclude;
-    omit?: Prisma.QueueOmit;
-  }): ReturnWithErrPromise<Queue> {
+    where: Prisma.AppointmentWhereUniqueInput;
+    include?: Prisma.AppointmentInclude;
+    omit?: Prisma.AppointmentOmit;
+  }): ReturnWithErrPromise<Appointment> {
     try {
-      const queue = await this.prisma.queue.delete({ where, include, omit });
+      const appointment = await this.prisma.appointment.delete({
+        where,
+        include,
+        omit,
+      });
 
-      if (!queue) {
+      if (!appointment) {
         throw new InternalServerErrorException('Не удается удалить очередь');
       }
 
-      return [queue, null];
+      return [appointment, null];
     } catch (err) {
       return exceptionHandler(err);
     }
   }
 
   private async isPossibleToBook(
-    data: CreateQueueDto,
-  ): ReturnWithErrPromise<Prisma.QueueUncheckedCreateInput> {
+    data: CreateAppointmentDto,
+  ): ReturnWithErrPromise<Prisma.AppointmentUncheckedCreateInput> {
     try {
       const [service, serviceError] = await this.serviceService.findOne({
         where: { id: data.serviceId },

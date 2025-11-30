@@ -1,7 +1,7 @@
 import { IsNumber, IsDate, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class FindMyQueryQueueDto {
+export class FindMyQueryAppointmentDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
@@ -23,7 +23,7 @@ export class FindMyQueryQueueDto {
   dateTo?: Date;
 }
 
-export class FindQueryQueueDto extends FindMyQueryQueueDto {
+export class FindQueryAppointmentDto extends FindMyQueryAppointmentDto {
   @IsNumber()
   @IsOptional()
   @Type(() => Number)
