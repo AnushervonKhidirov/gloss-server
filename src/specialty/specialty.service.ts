@@ -91,7 +91,7 @@ export class SpecialtyService {
     try {
       const specialty = await this.prisma.specialty.update({
         where,
-        data,
+        data: { ...data, desc: data.desc ?? null },
         include,
         omit,
       });
