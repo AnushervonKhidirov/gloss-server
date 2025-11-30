@@ -75,7 +75,7 @@ Table worker_service {
 
 Table specialty {
   id Int [pk, increment]
-  value String [unique, not null]
+  name String [unique, not null]
   desc String
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]

@@ -27,7 +27,7 @@ model User {
   role          Role            @default(WORKER)
   specialtyId   Int?            @map("specialty_id")
   specialty     Specialty?      @relation(fields: [specialtyId], references: [id])
-  appointment         Appointment[]
+  appointment   Appointment[]
   workerService WorkerService[]
   tokens        Token[]
 
@@ -35,12 +35,12 @@ model User {
 }
 
 model Client {
-  id        Int      @id @default(autoincrement())
-  phone     String   @unique @db.VarChar(40)
-  name      String   @db.VarChar(40)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
-  appointment     Appointment[]
+  id          Int           @id @default(autoincrement())
+  phone       String        @unique @db.VarChar(40)
+  name        String        @db.VarChar(40)
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamp(0)
+  appointment Appointment[]
 
   @@map("client")
 }
@@ -55,7 +55,7 @@ model Service {
   updatedAt     DateTime        @updatedAt @map("updated_at") @db.Timestamp(0)
   category      Category        @relation(fields: [categoryId], references: [id])
   categoryId    Int
-  appointment         Appointment[]
+  appointment   Appointment[]
   workerService WorkerService[]
 
   @@map("services")
@@ -98,7 +98,7 @@ model WorkerService {
 
 model Specialty {
   id        Int      @id @default(autoincrement())
-  value     String   @unique @db.VarChar(60)
+  name      String   @unique @db.VarChar(60)
   desc      String?  @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamp(0)
