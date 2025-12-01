@@ -27,39 +27,10 @@ import { UpdateServiceDto } from './dto/update-service.dto';
 import { WorkerServiceDto } from './dto/worker-service-price.dto';
 import { FindQueryWorkerServiceDto } from './dto/find-query-worker-service-price.dto';
 
-const fieldsToOmit: Prisma.UserOmit = {
-  username: true,
-  password: true,
-  role: true,
-  archived: true,
-  createdAt: true,
-  updatedAt: true,
-};
-
 @Controller('service')
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
-  @UseGuards(AuthGuard)
-  @Get('worker/my')
-  async findMyServices(@Req() request: Request) {
-    const userPayload: UserTokenPayload = request['user'];
-
-    const [service, err] = await this.serviceService.findWorkerServices({
-      where: { userId: +userPayload.sub },
-      include: {
-        service: {
-          omit: { createdAt: true, updatedAt: true },
-          include: { category: { omit: { createdAt: true, updatedAt: true } } },
-        },
-      },
-    });
-
-    if (err) throw err;
-    return service;
-  }
-
-  @UseGuards(AuthGuard)
   @Get('worker')
   async findWorkerServices(
     @Query(new ValidationPipe({ transform: true }))

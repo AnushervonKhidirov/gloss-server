@@ -21,10 +21,10 @@ import { Roles } from 'src/role/role.decorator';
 
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Prisma, Role } from 'generated/prisma/client';
+import { Prisma } from 'generated/prisma/client';
 
 const userInclude: Prisma.UserInclude = {
-  specialty: { omit: { createdAt: true, updatedAt: true } },
+  specialty: { omit: { createdAt: true, updatedAt: true, desc: true } },
 };
 
 const userOmit: Prisma.UserOmit = {
