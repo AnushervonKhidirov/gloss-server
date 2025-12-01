@@ -70,7 +70,10 @@ export class AppointmentController {
         userId: +userPayload.sub,
         clientId: clientId,
         serviceId: serviceId,
-        startAt: { gte: dateFrom, lt: dateTo },
+        OR: [
+          { startAt: { gte: dateFrom } },
+          { endAt: { gte: dateFrom, lt: dateTo } },
+        ],
       },
       include: appointmentIncludes(serviceId),
     });
@@ -106,7 +109,10 @@ export class AppointmentController {
         userId: { equals: userId, not: exceptUserId },
         clientId: clientId,
         serviceId: serviceId,
-        startAt: { gte: dateFrom, lt: dateTo },
+        OR: [
+          { startAt: { gte: dateFrom } },
+          { endAt: { gte: dateFrom, lt: dateTo } },
+        ],
       },
       include: appointmentIncludes(serviceId),
     });
