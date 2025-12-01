@@ -56,31 +56,6 @@ const appointmentIncludes = (
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
 
-  @UseGuards(AuthGuard)
-  @Get('my')
-  async findMyAppointment(
-    @Req() request: Request,
-    @Query(new ValidationPipe({ transform: true }))
-    { clientId, serviceId, dateFrom, dateTo }: FindMyQueryAppointmentDto,
-  ) {
-    const userPayload: UserTokenPayload = request['user'];
-
-    const [appointments, err] = await this.appointmentService.findMany({
-      where: {
-        userId: +userPayload.sub,
-        clientId: clientId,
-        serviceId: serviceId,
-        OR: [
-          { startAt: { gte: dateFrom } },
-          { endAt: { gte: dateFrom, lt: dateTo } },
-        ],
-      },
-      include: appointmentIncludes(serviceId),
-    });
-    if (err) throw err;
-    return appointments;
-  }
-
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [appointment, err] = await this.appointmentService.findOne({
