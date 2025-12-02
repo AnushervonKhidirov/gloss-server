@@ -82,11 +82,11 @@ export class UserController {
     @Param('id', ParseIntPipe) id: number,
     @Body(new ValidationPipe()) data: UpdateUserDto,
   ) {
-    const { username, firstName, lastName, password } = data;
+    const { username, firstName, lastName, specialtyId, password } = data;
 
     const [user, err] = await this.userService.update({
       where: { id },
-      data: { username, firstName, lastName, password },
+      data: { username, firstName, lastName, specialtyId, password },
       include: userInclude,
       omit: userOmit,
     });
@@ -102,11 +102,11 @@ export class UserController {
     @Req() request: Request,
   ) {
     const userPayload: UserTokenPayload = request['user'];
-    const { username, firstName, lastName, password } = data;
+    const { username, firstName, lastName, specialtyId, password } = data;
 
     const [user, err] = await this.userService.update({
       where: { id: +userPayload.sub },
-      data: { username, firstName, lastName, password },
+      data: { username, firstName, lastName, specialtyId, password },
       include: userInclude,
       omit: userOmit,
     });

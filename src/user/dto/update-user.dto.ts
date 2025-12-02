@@ -5,6 +5,7 @@ import {
   MaxLength,
   IsOptional,
   IsBoolean,
+  IsNumber,
 } from 'class-validator';
 import { CreateUserDto } from './create-user.dto';
 
@@ -14,6 +15,10 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @MaxLength(40)
   @IsNotEmpty()
   lastName?: string;
+
+  @IsNumber()
+  @IsOptional()
+  specialtyId?: number;
 
   @IsBoolean()
   @IsOptional()
