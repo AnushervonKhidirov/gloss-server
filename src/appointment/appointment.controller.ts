@@ -24,10 +24,7 @@ import { AppointmentService } from './appointment.service';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
-import {
-  FindQueryAppointmentDto,
-  FindMyQueryAppointmentDto,
-} from './dto/find-query-appointment.dto';
+import { FindQueryAppointmentDto } from './dto/find-query-appointment.dto';
 
 const appointmentIncludes = (
   serviceId?: number,
@@ -56,6 +53,7 @@ const appointmentIncludes = (
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
 
+  @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [appointment, err] = await this.appointmentService.findOne({
@@ -67,6 +65,7 @@ export class AppointmentController {
     return appointment;
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   async findMany(
     @Query(new ValidationPipe({ transform: true }))

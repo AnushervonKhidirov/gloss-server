@@ -1,5 +1,6 @@
+import type { Prisma, BlackList } from 'generated/prisma/client';
+
 import { Injectable } from '@nestjs/common';
-import { BlackList } from 'generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateBlackListDto } from './dto/create-black-list.dto';
 
@@ -10,27 +11,80 @@ import { ReturnWithErrPromise } from 'src/type/return-with-err.type';
 export class BlackListService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findMany(): ReturnWithErrPromise<BlackList[]> {
+  async findFirst({
+    where,
+    omit,
+  }: {
+    where: Prisma.BlackListWhereInput;
+    omit?: Prisma.BlackListOmit;
+  }): ReturnWithErrPromise<BlackList | null> {
     try {
-      const blackList = await this.prisma.blackList.findMany();
+      const blackList = await this.prisma.blackList.findFirst({ where, omit });
+
       return [blackList, null];
     } catch (err) {
       return exceptionHandler(err);
     }
   }
 
-  async create(data: CreateBlackListDto): ReturnWithErrPromise<BlackList> {
+  async findOne({
+    where,
+    omit,
+  }: {
+    where: Prisma.BlackListWhereUniqueInput;
+    omit?: Prisma.BlackListOmit;
+  }): ReturnWithErrPromise<BlackList | null> {
     try {
-      const blackList = await this.prisma.blackList.create({ data });
+      const blackList = await this.prisma.blackList.findUnique({ where, omit });
+
       return [blackList, null];
     } catch (err) {
       return exceptionHandler(err);
     }
   }
 
-  async delete(id: number): ReturnWithErrPromise<BlackList> {
+  async findMany({
+    where,
+    omit,
+  }: {
+    where?: Prisma.BlackListWhereInput;
+    omit?: Prisma.BlackListOmit;
+  } = {}): ReturnWithErrPromise<BlackList[]> {
     try {
-      const blackList = await this.prisma.blackList.delete({ where: { id } });
+      const blackList = await this.prisma.blackList.findMany({ where, omit });
+      return [blackList, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
+
+  async create({
+    data,
+    omit,
+  }: {
+    data: CreateBlackListDto;
+    omit?: Prisma.BlackListOmit;
+  }): ReturnWithErrPromise<BlackList> {
+    try {
+      const blackList = await this.prisma.blackList.create({ data, omit });
+      return [blackList, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
+
+  async delete({
+    where,
+    omit,
+  }: {
+    where: Prisma.BlackListWhereUniqueInput;
+    omit?: Prisma.BlackListOmit;
+  }): ReturnWithErrPromise<BlackList> {
+    try {
+      const blackList = await this.prisma.blackList.delete({
+        where,
+        omit,
+      });
       return [blackList, null];
     } catch (err) {
       return exceptionHandler(err);

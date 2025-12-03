@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   ValidationPipe,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -30,6 +31,7 @@ export class ClientController {
     private readonly blackListService: BlackListService,
   ) {}
 
+  @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [client, err] = await this.clientService.findOne({
@@ -41,6 +43,7 @@ export class ClientController {
     return client;
   }
 
+  @UseGuards(AuthGuard)
   @Get()
   async findMany(
     @Query(new ValidationPipe({ transform: true }))
@@ -64,6 +67,14 @@ export class ClientController {
 
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateClientDto) {
+    const [isBlocked, blackListErr] = await this.blackListService.findFirst({
+      where: { phone: data.phone },
+    });
+
+    if (blackListErr) throw blackListErr;
+    if (isBlocked)
+      throw new ForbiddenException('Ваш номер в черном списке компании');
+
     const [client, err] = await this.clientService.create({
       data,
       omit: { createdAt: true, updatedAt: true },

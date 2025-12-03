@@ -27,14 +27,16 @@ export class BlackListController {
 
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateBlackListDto) {
-    const [blackList, err] = await this.blackListService.create(data);
+    const [blackList, err] = await this.blackListService.create({ data });
     if (err) throw err;
     return blackList;
   }
 
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const [blackList, err] = await this.blackListService.delete(id);
+    const [blackList, err] = await this.blackListService.delete({
+      where: { id },
+    });
     if (err) throw err;
     return blackList;
   }
