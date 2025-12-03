@@ -21,10 +21,13 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { Role } from 'generated/prisma/client';
 
 import { AppointmentService } from './appointment.service';
+import { BlackListService } from 'src/black-list/black-list.service';
+import { ClientService } from 'src/client/client.service';
 
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { FindQueryAppointmentDto } from './dto/find-query-appointment.dto';
+import { CreateAppointmentClientDto } from './dto/create-appointment-client.dto';
 
 const appointmentIncludes = (
   serviceId?: number,
@@ -51,7 +54,11 @@ const appointmentIncludes = (
 
 @Controller('appointment')
 export class AppointmentController {
-  constructor(private readonly appointmentService: AppointmentService) {}
+  constructor(
+    private readonly appointmentService: AppointmentService,
+    private readonly blackListService: BlackListService,
+    private readonly clientService: ClientService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get(':id')
@@ -94,6 +101,7 @@ export class AppointmentController {
     return appointments;
   }
 
+  @UseGuards(AuthGuard)
   @Post()
   async create(
     @Body(new ValidationPipe({ transform: true })) data: CreateAppointmentDto,
@@ -102,6 +110,33 @@ export class AppointmentController {
       data,
       include: appointmentIncludes(),
     });
+    if (err) throw err;
+    return appointment;
+  }
+
+  @Post('/with_client')
+  async createWithClient(
+    @Body(new ValidationPipe({ transform: true }))
+    data: CreateAppointmentClientDto,
+  ) {
+    const { phone, name, ...appointmentData } = data;
+
+    const [isBlocked] = await this.blackListService.findFirst({
+      where: { phone },
+    });
+
+    if (isBlocked) throw new ForbiddenException();
+
+    const [client, clientErr] = await this.clientService.findOrCreate({
+      data: { phone, name },
+    });
+
+    if (clientErr) throw clientErr;
+
+    const [appointment, err] = await this.appointmentService.create({
+      data: { ...appointmentData, clientId: client.id },
+    });
+
     if (err) throw err;
     return appointment;
   }

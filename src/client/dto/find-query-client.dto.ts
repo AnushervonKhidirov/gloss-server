@@ -33,5 +33,5 @@ export class FindQueryClientDto {
     if (value === 'false') return false;
     return value;
   })
-  exceptBlackList: boolean;
+  omitBlackList: boolean;
 }

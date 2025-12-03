@@ -10,7 +10,6 @@ import {
   ParseIntPipe,
   ValidationPipe,
   UseGuards,
-  ForbiddenException,
 } from '@nestjs/common';
 
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -24,6 +23,7 @@ import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { FindQueryClientDto } from './dto/find-query-client.dto';
 
+@UseGuards(AuthGuard)
 @Controller('client')
 export class ClientController {
   constructor(
@@ -45,11 +45,11 @@ export class ClientController {
   @Get()
   async findMany(
     @Query(new ValidationPipe({ transform: true }))
-    { name, phone, exceptBlackList }: FindQueryClientDto,
+    { name, phone, omitBlackList }: FindQueryClientDto,
   ) {
     let blackListPhones: string[] = [];
 
-    if (exceptBlackList) {
+    if (omitBlackList) {
       const [blackList, blackListErr] = await this.blackListService.findMany();
       if (blackListErr) throw blackListErr;
       blackListPhones = blackList.map((item) => item.phone);
@@ -65,13 +65,13 @@ export class ClientController {
 
   @Post()
   async create(@Body(new ValidationPipe()) data: CreateClientDto) {
-    const [isBlocked, blackListErr] = await this.blackListService.findFirst({
+    const [blockedClient] = await this.blackListService.findFirst({
       where: { phone: data.phone },
     });
 
-    if (blackListErr) throw blackListErr;
-    if (isBlocked)
-      throw new ForbiddenException('Ваш номер в черном списке компании');
+    if (blockedClient) {
+      await this.blackListService.delete({ where: { id: blockedClient.id } });
+    }
 
     const [client, err] = await this.clientService.create({
       data,
@@ -82,7 +82,7 @@ export class ClientController {
     return client;
   }
 
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(RoleGuard)
   @Roles(['ADMIN'])
   @Patch(':id')
   async update(
@@ -99,7 +99,7 @@ export class ClientController {
     return client;
   }
 
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(RoleGuard)
   @Roles(['ADMIN'])
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number) {

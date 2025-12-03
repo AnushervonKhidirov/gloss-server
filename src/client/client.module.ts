@@ -9,5 +9,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
   imports: [TokenModule, BlackListModule],
   providers: [ClientService, PrismaService],
   controllers: [ClientController],
+  exports: [ClientService],
 })
 export class ClientModule {}

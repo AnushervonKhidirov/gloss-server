@@ -2,6 +2,7 @@ import type { Prisma, Client } from 'generated/prisma/client';
 import type { ReturnWithErrPromise } from 'src/type/return-with-err.type';
 
 import {
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -16,6 +17,45 @@ import { exceptionHandler } from 'src/utils/helper/exception-handler.helper';
 @Injectable()
 export class ClientService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findOrCreate({
+    data,
+    include,
+    omit,
+  }: {
+    data: CreateClientDto;
+    include?: Prisma.ClientInclude;
+    omit?: Prisma.ClientOmit;
+  }): ReturnWithErrPromise<Client> {
+    try {
+      const [client, err] = await this.findOne({
+        where: { phone: data.phone },
+        include,
+        omit,
+      });
+
+      if (err) {
+        const errStatus = err.getStatus();
+        if (errStatus !== (HttpStatus.NOT_FOUND as number)) {
+          throw err;
+        }
+
+        const [createdClient, createErr] = await this.create({
+          data,
+          include,
+          omit,
+        });
+
+        if (createErr) throw createErr;
+
+        return [createdClient, null];
+      }
+
+      return [client, null];
+    } catch (err) {
+      return exceptionHandler(err);
+    }
+  }
 
   async findOne({
     where,
