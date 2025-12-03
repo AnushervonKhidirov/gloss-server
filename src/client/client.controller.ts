@@ -31,7 +31,6 @@ export class ClientController {
     private readonly blackListService: BlackListService,
   ) {}
 
-  @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
     const [client, err] = await this.clientService.findOne({
@@ -43,7 +42,6 @@ export class ClientController {
     return client;
   }
 
-  @UseGuards(AuthGuard)
   @Get()
   async findMany(
     @Query(new ValidationPipe({ transform: true }))
