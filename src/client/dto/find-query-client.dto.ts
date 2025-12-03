@@ -1,23 +1,37 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import parsePhoneNumberFromString from 'libphonenumber-js';
-import { IsPhoneNumber, IsString, IsOptional } from 'class-validator';
-import { Client } from 'generated/prisma';
+import {
+  IsPhoneNumber,
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsBooleanString,
+} from 'class-validator';
 
 export class FindQueryClientDto {
   @IsPhoneNumber('TJ')
   @IsOptional()
-  @Transform(({ obj }: { obj: Client }) => {
+  @Transform(({ value }) => {
     const formattedNumber = parsePhoneNumberFromString(
-      obj.phone,
+      value,
       'TJ',
     )?.number.toString();
 
-    obj.phone = formattedNumber ?? obj.phone;
-    return obj.phone;
+    value = formattedNumber ?? value;
+    return value;
   })
-  phone: string;
+  phone?: string;
 
   @IsString()
   @IsOptional()
-  name: string;
+  name?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  exceptBlackList: boolean;
 }

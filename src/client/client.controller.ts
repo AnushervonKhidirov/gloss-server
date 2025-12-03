@@ -17,6 +17,7 @@ import { RoleGuard } from 'src/role/role.guard';
 import { Roles } from 'src/role/role.decorator';
 
 import { ClientService } from './client.service';
+import { BlackListService } from 'src/black-list/black-list.service';
 
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -24,7 +25,10 @@ import { FindQueryClientDto } from './dto/find-query-client.dto';
 
 @Controller('client')
 export class ClientController {
-  constructor(private readonly clientService: ClientService) {}
+  constructor(
+    private readonly clientService: ClientService,
+    private readonly blackListService: BlackListService,
+  ) {}
 
   @Get(':id')
   async findOne(@Param('id', ParseIntPipe) id: number) {
@@ -38,9 +42,19 @@ export class ClientController {
   }
 
   @Get()
-  async findMany(@Query(new ValidationPipe()) where: FindQueryClientDto) {
+  async findMany(
+    @Query(new ValidationPipe({ transform: true }))
+    { name, phone, exceptBlackList }: FindQueryClientDto,
+  ) {
+    let blackListPhones: string[] = [];
+
+    if (exceptBlackList) {
+      const [blackList, blackListErr] = await this.blackListService.findMany();
+      if (blackListErr) throw blackListErr;
+      blackListPhones = blackList.map((item) => item.phone);
+    }
     const [clients, err] = await this.clientService.findMany({
-      where,
+      where: { name, phone: { equals: phone, notIn: blackListPhones } },
       omit: { createdAt: true, updatedAt: true },
     });
 

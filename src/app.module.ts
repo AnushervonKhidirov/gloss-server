@@ -11,6 +11,7 @@ import { ServiceModule } from './service/service.module';
 import { WorkerModule } from './worker/worker.module';
 import { AppointmentModule } from './appointment/appointment.module';
 import { ClientModule } from './client/client.module';
+import { BlackListModule } from './black-list/black-list.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ClientModule } from './client/client.module';
     WorkerModule,
     AppointmentModule,
     ClientModule,
+    BlackListModule,
   ],
   controllers: [],
   providers: [PrismaService],
