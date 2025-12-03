@@ -27,6 +27,7 @@ Table client {
   name String [not null]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
+  blocked Boolean [not null, default: false]
   appointments appointment [not null]
 }
 
@@ -84,7 +85,7 @@ Table specialty {
 
 Table black_list {
   id Int [pk, increment]
-  phone String [not null]
+  phone String [unique, not null]
 }
 
 Table tokens {

@@ -67,6 +67,18 @@ export class BlackListService {
   }): ReturnWithErrPromise<BlackList> {
     try {
       const blackList = await this.prisma.blackList.create({ data, omit });
+
+      const client = await this.prisma.client.findFirst({
+        where: { phone: blackList.phone },
+      });
+
+      if (client) {
+        await this.prisma.client.update({
+          where: { phone: blackList.phone },
+          data: { blocked: true },
+        });
+      }
+
       return [blackList, null];
     } catch (err) {
       return exceptionHandler(err);
@@ -85,6 +97,18 @@ export class BlackListService {
         where,
         omit,
       });
+
+      const client = await this.prisma.client.findFirst({
+        where: { phone: blackList.phone },
+      });
+
+      if (client) {
+        await this.prisma.client.update({
+          where: { phone: blackList.phone },
+          data: { blocked: false },
+        });
+      }
+
       return [blackList, null];
     } catch (err) {
       return exceptionHandler(err);
