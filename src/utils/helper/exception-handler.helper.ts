@@ -30,15 +30,21 @@ function prismaErrHandler(err: PrismaClientKnownRequestError) {
   const Error: {
     [key: PrismaClientKnownRequestError['code']]: HttpException;
   } = {
-    P2025: new NotFoundException(err.meta?.cause),
-    P2002: new ConflictException(err.meta?.cause),
+    P2025: new NotFoundException(
+      (err.meta?.cause as string) + `Code: ${err.code}`,
+    ),
+    P2002: new ConflictException(
+      (err.meta?.cause as string) + `Code: ${err.code}`,
+    ),
     P2003: new BadRequestException(
-      `Foreign key constraint failed on the field (${err.meta?.constraint?.[0]})`,
+      `Foreign key constraint failed on the field (${err.meta?.constraint?.[0]}). Code: ${err.code}`,
     ),
   };
 
   if (!Error[err.code]) {
-    return new InternalServerErrorException(`Database error code ${err.code}`);
+    return new InternalServerErrorException(
+      `Ошибка в базе данных. Code ${err.code}`,
+    );
   }
 
   return Error[err.code];
