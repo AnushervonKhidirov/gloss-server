@@ -32,10 +32,10 @@ export class BlackListController {
     return blackList;
   }
 
-  @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number) {
+  @Delete(':phone')
+  async delete(@Param('phone') phone: string) {
     const [blackList, err] = await this.blackListService.delete({
-      where: { id },
+      where: { phone },
     });
     if (err) throw err;
     return blackList;
